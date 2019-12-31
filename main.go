@@ -2,124 +2,202 @@ package main
 
 import (
 	"fmt"
+	"math/rand"
+	"time"
 )
 
-var cells = [9][9]string{
-	[9]string{
+type Cell struct {
+	number    int
+	generated bool // those have a default color
+	valid     bool // those have a red or green color
+}
+
+var cells = [9][9]Cell{
+	[9]Cell{
+		"8",
+		" ",
+		"5",
 		" ",
 		" ",
+		"9",
+		"7",
+		"4",
+		" ",
+	},
+	[9]Cell{
 		" ",
 		" ",
+		"3",
 		" ",
+		"8",
+		"6",
 		" ",
+		"9",
+		" ",
+	},
+	[9]Cell{
+		" ",
+		"9",
+		" ",
+		"4",
+		" ",
+		"2",
+		" ",
+		"6",
+		" ",
+	},
+	[9]Cell{
+		" ",
+		"2",
+		" ",
+		"5",
+		" ",
+		"3",
 		" ",
 		" ",
 		" ",
 	},
-	[9]string{
+	[9]Cell{
+		" ",
+		"5",
+		" ",
+		"6",
 		" ",
 		" ",
+		"9",
+		" ",
+		"4",
+	},
+	[9]Cell{
 		" ",
 		" ",
+		"4",
 		" ",
 		" ",
-		" ",
-		" ",
+		"8",
+		"6",
+		"2",
 		" ",
 	},
-	[9]string{
+	[9]Cell{
 		" ",
 		" ",
 		" ",
 		" ",
 		" ",
 		" ",
+		"2",
+		" ",
+		"3",
+	},
+	[9]Cell{
+		"4",
+		"3",
 		" ",
 		" ",
+		"6",
+		"1",
+		" ",
+		"5",
 		" ",
 	},
-	[9]string{
+	[9]Cell{
+		"9",
+		"1",
 		" ",
+		"8",
 		" ",
-		" ",
-		" ",
-		" ",
-		" ",
-		" ",
-		" ",
-		" ",
-	},
-	[9]string{
-		" ",
-		" ",
-		" ",
-		" ",
-		" ",
-		" ",
-		" ",
-		" ",
-		" ",
-	},
-	[9]string{
-		" ",
-		" ",
-		" ",
-		" ",
-		" ",
-		" ",
-		" ",
-		" ",
-		" ",
-	},
-	[9]string{
-		" ",
-		" ",
-		" ",
-		" ",
-		" ",
-		" ",
-		" ",
-		" ",
-		" ",
-	},
-	[9]string{
-		" ",
-		" ",
-		" ",
-		" ",
-		" ",
-		" ",
-		" ",
-		" ",
-		" ",
-	},
-	[9]string{
-		" ",
-		" ",
-		" ",
-		" ",
-		" ",
-		" ",
-		" ",
-		" ",
-		" ",
+		"5",
+		"4",
+		"7",
+		"6",
 	},
 }
 
-var reset = "\033[0m"
+func (c Cell) Content() {
+	if c.number == 0 {
+
+	}
+}
 
 func main() {
 
-	cells[0][7] = "\033[1;31m5\033[0m"
-	cells[0][7] = "\033[2;94m2\033[0m"
-	cells[2][2] = printNumber(true, false, 1)
-	cells[8][4] = printNumber(false, true, 9)
-	cells[4][0] = printNumber(false, validateCell(cells[4][0]), 6)
+	// cells[0][7] = "\033[1;31m5\033[0m"
+	// cells[0][7] = "\033[2;94m2\033[0m"
+	// cells[2][2] = printNumber(true, false, 1)
+	// cells[8][4] = printNumber(false, true, 9)
+	// cells[4][0] = printNumber(false, false, 6)
+
+	// populate cells array
+	// i.e generate a random puzzle to solve
+	// randomCells()
+
+	printBoard(cells)
+	solve()
 
 	printBoard(cells)
 
 	fmt.Printf("\n\n")
 
+}
+
+func solve() {
+
+	var crn int
+
+	for i := 0; i < 9; i++ {
+		for j := 0; j < 9; j++ {
+
+			if cells[i][j] != " " {
+				crn = cells[i][j].number
+				highlight(i, j, crn)
+				break
+			}
+		}
+	}
+}
+
+// cross-hatching method:
+// https://www.stolaf.edu/people/hansonr/sudoku/explain.htm#scanning
+// algorithm explanation:
+// starting with every digit, search for all occurences
+// save all positions of that digit
+// for each position, highlight all row and columns
+// find all row and columns which that digit is missing
+func crosshatch() {
+
+	// locations := make(map[int][9]int)
+
+	for i := 0; i < 9; i++ {
+		for j := 0; j < 9; j++ {
+			// start with the number 1
+			// locations[cells[i][j]] = append(, )
+			if cells[i][j] == "1" {
+				return
+			}
+		}
+	}
+}
+
+func highlight(line int, column int, num int) {
+	// cells[line][column] = printCell(false, true, num)
+}
+
+func randomCells() {
+
+	r := rand.New(rand.NewSource(time.Now().UnixNano()))
+
+	for i := 0; i < 9; i++ {
+		for j := 0; j < 9; j++ {
+			cells[i][j] = fmt.Sprintf("%d", r.Intn(9)+1)
+		}
+	}
+
+	// for i := 0; i < 9; i++ {
+	// 	ec := r.Intn(10)
+	// 	cells[i][ec] = " "
+	// 	cells[i][ec+r.Intn(n)] = " "
+	// }
 }
 
 func validateCell(cell [9][9]string) bool {
@@ -129,7 +207,7 @@ func validateCell(cell [9][9]string) bool {
 	return false
 }
 
-func printNumber(gen bool, valid bool, num int) string {
+func printCell(gen bool, valid bool, num string) string {
 
 	color := "97" // white color for auto-generated numbers
 
@@ -141,10 +219,11 @@ func printNumber(gen bool, valid bool, num int) string {
 		}
 	}
 
-	return "\033[0;" + color + "m" + fmt.Sprintf("%d", num) + reset
+	return "\033[0;" + color + "m" + num + "\033[0m"
 }
 
-func printBoard(cells [9][9]string) {
+// prints the board with the cells contents if any
+func printBoard() {
 
 	// START first line of boxes
 
