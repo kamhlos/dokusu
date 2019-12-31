@@ -7,117 +7,131 @@ import (
 )
 
 type Cell struct {
-	number    int
-	generated bool // those have a default color
-	valid     bool // those have a red or green color
+	num   int
+	gen   bool // auto-generated numbers have a default color
+	valid bool // those have a red or green color
 }
+
+var numpos [8]Cell // where else this number is found
 
 var cells = [9][9]Cell{
 	[9]Cell{
-		"8",
-		" ",
-		"5",
-		" ",
-		" ",
-		"9",
-		"7",
-		"4",
-		" ",
+		Cell{num: 8, gen: true},
+		Cell{num: 0, gen: true},
+		Cell{num: 5, gen: true},
+		Cell{num: 0, gen: true},
+		Cell{num: 0, gen: true},
+		Cell{num: 9, gen: true},
+		Cell{num: 7, gen: true},
+		Cell{num: 4, gen: true},
+		Cell{num: 0, gen: true},
 	},
 	[9]Cell{
-		" ",
-		" ",
-		"3",
-		" ",
-		"8",
-		"6",
-		" ",
-		"9",
-		" ",
+		Cell{num: 0, gen: true},
+		Cell{num: 0, gen: true},
+		Cell{num: 3, gen: true},
+		Cell{num: 0, gen: true},
+		Cell{num: 8, gen: true},
+		Cell{num: 6, gen: true},
+		Cell{num: 0, gen: true},
+		Cell{num: 9, gen: true},
+		Cell{num: 0, gen: true},
 	},
 	[9]Cell{
-		" ",
-		"9",
-		" ",
-		"4",
-		" ",
-		"2",
-		" ",
-		"6",
-		" ",
+		Cell{num: 0, gen: true},
+		Cell{num: 9, gen: true},
+		Cell{num: 0, gen: true},
+		Cell{num: 4, gen: true},
+		Cell{num: 0, gen: true},
+		Cell{num: 2, gen: true},
+		Cell{num: 0, gen: true},
+		Cell{num: 6, gen: true},
+		Cell{num: 0, gen: true},
 	},
 	[9]Cell{
-		" ",
-		"2",
-		" ",
-		"5",
-		" ",
-		"3",
-		" ",
-		" ",
-		" ",
+		Cell{num: 0, gen: true},
+		Cell{num: 2, gen: true},
+		Cell{num: 0, gen: true},
+		Cell{num: 5, gen: true},
+		Cell{num: 0, gen: true},
+		Cell{num: 3, gen: true},
+		Cell{num: 0, gen: true},
+		Cell{num: 0, gen: true},
+		Cell{num: 0, gen: true},
 	},
 	[9]Cell{
-		" ",
-		"5",
-		" ",
-		"6",
-		" ",
-		" ",
-		"9",
-		" ",
-		"4",
+		Cell{num: 0, gen: true},
+		Cell{num: 5, gen: true},
+		Cell{num: 0, gen: true},
+		Cell{num: 6, gen: true},
+		Cell{num: 0, gen: true},
+		Cell{num: 0, gen: true},
+		Cell{num: 9, gen: true},
+		Cell{num: 0, gen: true},
+		Cell{num: 4, gen: true},
 	},
 	[9]Cell{
-		" ",
-		" ",
-		"4",
-		" ",
-		" ",
-		"8",
-		"6",
-		"2",
-		" ",
+		Cell{num: 0, gen: true},
+		Cell{num: 0, gen: true},
+		Cell{num: 4, gen: true},
+		Cell{num: 0, gen: true},
+		Cell{num: 0, gen: true},
+		Cell{num: 8, gen: true},
+		Cell{num: 6, gen: true},
+		Cell{num: 2, gen: true},
+		Cell{num: 0, gen: true},
 	},
 	[9]Cell{
-		" ",
-		" ",
-		" ",
-		" ",
-		" ",
-		" ",
-		"2",
-		" ",
-		"3",
+		Cell{num: 0, gen: true},
+		Cell{num: 0, gen: true},
+		Cell{num: 0, gen: true},
+		Cell{num: 0, gen: true},
+		Cell{num: 0, gen: true},
+		Cell{num: 0, gen: true},
+		Cell{num: 2, gen: true},
+		Cell{num: 0, gen: true},
+		Cell{num: 3, gen: true},
 	},
 	[9]Cell{
-		"4",
-		"3",
-		" ",
-		" ",
-		"6",
-		"1",
-		" ",
-		"5",
-		" ",
+		Cell{num: 4, gen: true},
+		Cell{num: 3, gen: true},
+		Cell{num: 0, gen: true},
+		Cell{num: 0, gen: true},
+		Cell{num: 6, gen: true},
+		Cell{num: 1, gen: true},
+		Cell{num: 0, gen: true},
+		Cell{num: 5, gen: true},
+		Cell{num: 0, gen: true},
 	},
 	[9]Cell{
-		"9",
-		"1",
-		" ",
-		"8",
-		" ",
-		"5",
-		"4",
-		"7",
-		"6",
+		Cell{num: 9, gen: true},
+		Cell{num: 1, gen: true},
+		Cell{num: 0, gen: true},
+		Cell{num: 8, gen: true},
+		Cell{num: 0, gen: true},
+		Cell{num: 5, gen: true},
+		Cell{num: 4, gen: true},
+		Cell{num: 7, gen: true},
+		Cell{num: 6, gen: true},
 	},
 }
 
-func (c Cell) Content() {
-	if c.number == 0 {
-
+func (c Cell) Content() string {
+	if c.num == 0 {
+		return " " // zero-numbered cells shown as empty
 	}
+
+	color := "97" // white color for auto-generated numbers
+
+	if !c.gen {
+		if c.valid {
+			color = "92"
+		} else {
+			color = "31"
+		}
+	}
+
+	return "\033[0;" + color + "m" + fmt.Sprintf("%d", c.num) + "\033[0m"
 }
 
 func main() {
@@ -132,29 +146,11 @@ func main() {
 	// i.e generate a random puzzle to solve
 	// randomCells()
 
-	printBoard(cells)
-	solve()
+	printBoard()
 
-	printBoard(cells)
+	printBoard()
 
 	fmt.Printf("\n\n")
-
-}
-
-func solve() {
-
-	var crn int
-
-	for i := 0; i < 9; i++ {
-		for j := 0; j < 9; j++ {
-
-			if cells[i][j] != " " {
-				crn = cells[i][j].number
-				highlight(i, j, crn)
-				break
-			}
-		}
-	}
 }
 
 // cross-hatching method:
@@ -166,15 +162,14 @@ func solve() {
 // find all row and columns which that digit is missing
 func crosshatch() {
 
-	// locations := make(map[int][9]int)
+	location := make(map[int][]string)
 
 	for i := 0; i < 9; i++ {
 		for j := 0; j < 9; j++ {
-			// start with the number 1
-			// locations[cells[i][j]] = append(, )
-			if cells[i][j] == "1" {
-				return
-			}
+			// iterate over all cells
+			// map existing numbers to locations
+			location[cells[i][j].num] = append(location[cells[i][j].num], fmt.Sprintf("row:%d", i)+fmt.Sprintf("col:%d", j))
+
 		}
 	}
 }
@@ -189,7 +184,7 @@ func randomCells() {
 
 	for i := 0; i < 9; i++ {
 		for j := 0; j < 9; j++ {
-			cells[i][j] = fmt.Sprintf("%d", r.Intn(9)+1)
+			cells[i][j].num = r.Intn(9) + 1
 		}
 	}
 
@@ -205,21 +200,6 @@ func validateCell(cell [9][9]string) bool {
 	// logic to validate each cell
 
 	return false
-}
-
-func printCell(gen bool, valid bool, num string) string {
-
-	color := "97" // white color for auto-generated numbers
-
-	if !gen {
-		if valid {
-			color = "92"
-		} else {
-			color = "31"
-		}
-	}
-
-	return "\033[0;" + color + "m" + num + "\033[0m"
 }
 
 // prints the board with the cells contents if any
@@ -299,11 +279,11 @@ func printBoard() {
 	fmt.Printf("\n\n")
 }
 
-func printNumberLine(cells [9]string) {
+func printNumberLine(cells [9]Cell) {
 
 	// replace 2502 with 250A or 2506 for vertical lines
 
-	fmt.Printf("\u2503 %s \u2502 %s \u2502 %s \u2503", cells[0], cells[1], cells[2])
-	fmt.Printf(" %s \u2502 %s \u2502 %s \u2503", cells[3], cells[4], cells[5])
-	fmt.Printf(" %s \u2502 %s \u2502 %s \u2503\n", cells[6], cells[7], cells[8])
+	fmt.Printf("\u2503 %s \u2502 %s \u2502 %s \u2503", cells[0].Content(), cells[1].Content(), cells[2].Content())
+	fmt.Printf(" %s \u2502 %s \u2502 %s \u2503", cells[3].Content(), cells[4].Content(), cells[5].Content())
+	fmt.Printf(" %s \u2502 %s \u2502 %s \u2503\n", cells[6].Content(), cells[7].Content(), cells[8].Content())
 }
