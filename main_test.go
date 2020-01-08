@@ -14,6 +14,10 @@ func TestPrintBoard(t *testing.T) {
 	} else {
 		fmt.Println("Difficulty: ", difficulty())
 		fmt.Println("0's count: ", len(positions[0]))
+		// cells[0][1].num = 9
+		// cells[0][1].gen = false
+		// cells[0][1].valid = true
+		// cells[0][1].selected = true
 		printBoard()
 	}
 
@@ -32,19 +36,33 @@ func TestRandomCells(t *testing.T) {
 
 }
 
-func TestHighlightRow(t *testing.T) {
+func TestSelectNumber(t *testing.T) {
 
-	// for _, v := range positions[0] {
-	// 	fmt.Println("0 is found in ", v)
+	err := selectNumber(6)
+	if err != nil {
+		fmt.Println("error selecting number")
+	}
+
+	printBoard()
+}
+
+func TestSelectCells(t *testing.T) {
+
+	// for a given cell cells[n][n] select a row and a column
+	// if err := selectCells(4, 8); err != nil {
+	// 	fmt.Printf("error selecting row/column: %s\n", err)
 	// }
+
+	// printBoard()
+
 }
 
 // only used to generate board code
-func TestPrintCellVar(t *testing.T) {
-	for i := 0; i < 9; i++ {
-		for j := 0; j < 9; j++ {
-			fmt.Printf("[9]Cell{row: %d, col: %d, gen: true, num: }\n", i, j)
-		}
+// func TestPrintCellVar(t *testing.T) {
+// 	for i := 0; i < 9; i++ {
+// 		for j := 0; j < 9; j++ {
+// 			fmt.Printf("[9]Cell{row: %d, col: %d, gen: true, num: }\n", i, j)
+// 		}
 
-	}
-}
+// 	}
+// }
