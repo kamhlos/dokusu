@@ -110,6 +110,34 @@ var positions map[int][]pos
 // 	Cell{row: 8, col: 8, gen: true, num: 6},
 // }
 
+const (
+	Reset      = "\x1b[0m"
+	Bright     = "\x1b[1m"
+	Dim        = "\x1b[2m"
+	Underscore = "\x1b[4m"
+	Blink      = "\x1b[5m"
+	Reverse    = "\x1b[7m"
+	Hidden     = "\x1b[8m"
+
+	FgBlack   = "\x1b[30m"
+	FgRed     = "\x1b[31m"
+	FgGreen   = "\x1b[32m"
+	FgYellow  = "\x1b[33m"
+	FgBlue    = "\x1b[34m"
+	FgMagenta = "\x1b[35m"
+	FgCyan    = "\x1b[36m"
+	FgWhite   = "\x1b[37m"
+
+	BgBlack   = "\x1b[40m"
+	BgRed     = "\x1b[41m"
+	BgGreen   = "\x1b[42m"
+	BgYellow  = "\x1b[43m"
+	BgBlue    = "\x1b[44m"
+	BgMagenta = "\x1b[45m"
+	BgCyan    = "\x1b[46m"
+	BgWhite   = "\x1b[47m"
+)
+
 var cells = [9][9]Cell{
 	[9]Cell{
 		Cell{num: 8, gen: true},
@@ -280,14 +308,16 @@ func validatePositions() error {
 	return nil
 }
 
+// selects rows and columns containing a given number
 func selectNumber(num int) error {
 
+	// first find the cells (positions) containing this number
 	numpos := positions[num]
 
 	fmt.Printf("number %d found in %d cells\n", num, len(numpos))
 
+	// select(highlight) rows and columns of those cells
 	for _, v := range numpos {
-		// fmt.Printf("%d found at: %v\n", number, v)
 		if err := selectCells(v.row, v.col); err != nil {
 			fmt.Printf("error selecting row/column: %s\n", err)
 		}
@@ -296,6 +326,7 @@ func selectNumber(num int) error {
 	return nil
 }
 
+// selects a row and a column of given cell position
 func selectCells(row int, col int) error {
 
 	// cannot select out of range
@@ -309,8 +340,6 @@ func selectCells(row int, col int) error {
 
 	// first select this cell
 	cells[row][col].selected = true
-	cells[row][col].gen = false
-	cells[row][col].valid = true
 
 	// there is no point in selecting an empty cell
 	if cells[row][col].num == 0 {
@@ -320,40 +349,40 @@ func selectCells(row int, col int) error {
 	// first select the cells within that row
 	for k, _ := range cells[row] {
 		cells[row][k].selected = true
-		cells[row][k].gen = false
-		cells[row][k].valid = true
 	}
 
 	// then select those within that column
 	for k, _ := range cells {
 		cells[k][col].selected = true
-		cells[k][col].gen = false
-		cells[k][col].valid = true
 	}
 
 	return nil
 }
 
+// Mark a possible candidate number for a cell
+func markCell(row int, col int, num int) {
+
+}
+
 func (c Cell) Content() string {
 
 	var number string
+	color := "97" // default is white foreground color
+
+	if c.selected {
+		color = "96" // cyan foreground color
+	}
 
 	// zero-numbered cells shown as empty
 	if c.num == 0 {
-		number = "-"
+		number = " "
 	} else {
 		number = fmt.Sprintf("%d", c.num)
 	}
 
-	color := "97" // white color for auto-generated numbers
-
 	if !c.gen {
 		if c.valid {
-			if c.selected {
-				color = "95"
-			} else {
-				color = "92"
-			}
+			color = "92"
 		} else {
 			color = "31"
 		}

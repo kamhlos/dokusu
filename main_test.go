@@ -18,7 +18,7 @@ func TestPrintBoard(t *testing.T) {
 		// cells[0][1].gen = false
 		// cells[0][1].valid = true
 		// cells[0][1].selected = true
-		printBoard()
+		//printBoard()
 	}
 
 }
@@ -38,9 +38,25 @@ func TestRandomCells(t *testing.T) {
 
 func TestSelectNumber(t *testing.T) {
 
-	err := selectNumber(6)
+	// test this number
+	num := 4
+
+	err := selectNumber(num)
 	if err != nil {
-		fmt.Println("error selecting number")
+		fmt.Printf("error selecting rows/cols for number: %d\n", num)
+	}
+
+	// find empty non-selected cells
+	for i := 0; i < 9; i++ {
+		for j := 0; j < 9; j++ {
+			if cells[i][j].selected == false {
+				if cells[i][j].num == 0 {
+					fmt.Printf("possible candidate for %d: row %d, col %d\n", num, i, j)
+					markCell(i, j, num)
+				}
+			}
+		}
+
 	}
 
 	printBoard()
