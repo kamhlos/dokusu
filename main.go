@@ -1,6 +1,11 @@
 package main
 
-import "fmt"
+import (
+	"bufio"
+	"fmt"
+	"os"
+	"strconv"
+)
 
 type Number struct {
 	num int
@@ -392,6 +397,8 @@ func (c Cell) Content() string {
 }
 
 func main() {
+
+	crosshatch()
 	// randomCells()
 
 	// printBoard()
@@ -424,6 +431,34 @@ func difficulty() string {
 // for each position, highlight all row and columns
 // find all row and columns which that digit is missing
 func crosshatch() {
+
+	var num int
+	scanner := bufio.NewScanner(os.Stdin)
+
+	for {
+		fmt.Print("Enter a number for cross hatch:")
+		scanner.Scan()
+		i, err := strconv.Atoi(scanner.Text())
+		if err != nil {
+			fmt.Printf("\n")
+			fmt.Printf("1 to 9 only\n")
+			continue
+		}
+
+		if i > 9 || i < 1 {
+			fmt.Printf("\n")
+			fmt.Print("1 to 9 only\n")
+			continue
+		}
+
+		num = i
+
+		break
+
+	}
+
+	// Use collected inputs
+	fmt.Println(num)
 
 	// location := make(map[int][]string)
 
@@ -463,6 +498,8 @@ func randomCells() {
 
 // prints the board with the cells contents if num not zero
 func printBoard() {
+
+	fmt.Println("\033[2J")
 
 	// START first row of boxes
 

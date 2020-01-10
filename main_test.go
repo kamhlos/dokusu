@@ -1,25 +1,22 @@
 package main
 
-import (
-	"fmt"
-	"testing"
-)
+import "testing"
 
 func TestPrintBoard(t *testing.T) {
 
-	err := mapNumberPositions()
+	// err := mapNumberPositions()
 
-	if err != nil {
-		fmt.Println("puzzle is invalid")
-	} else {
-		fmt.Println("Difficulty: ", difficulty())
-		fmt.Println("0's count: ", len(positions[0]))
-		// cells[0][1].num = 9
-		// cells[0][1].gen = false
-		// cells[0][1].valid = true
-		// cells[0][1].selected = true
-		//printBoard()
-	}
+	// if err != nil {
+	// 	fmt.Println("puzzle is invalid")
+	// } else {
+	// 	fmt.Println("Difficulty: ", difficulty())
+	// 	fmt.Println("0's count: ", len(positions[0]))
+	// 	// cells[0][1].num = 9
+	// 	// cells[0][1].gen = false
+	// 	// cells[0][1].valid = true
+	// 	// cells[0][1].selected = true
+	// 	//printBoard()
+	// }
 
 }
 
@@ -36,31 +33,28 @@ func TestRandomCells(t *testing.T) {
 
 }
 
-func TestSelectNumber(t *testing.T) {
+// func TestSelectNumber(t *testing.T) {
 
-	// test this number
-	num := 4
+// 	err := selectNumber(num)
+// 	if err != nil {
+// 		fmt.Printf("error selecting rows/cols for number: %d\n", num)
+// 	}
 
-	err := selectNumber(num)
-	if err != nil {
-		fmt.Printf("error selecting rows/cols for number: %d\n", num)
-	}
+// 	// find empty non-selected cells
+// 	for i := 0; i < 9; i++ {
+// 		for j := 0; j < 9; j++ {
+// 			if cells[i][j].selected == false {
+// 				if cells[i][j].num == 0 {
+// 					fmt.Printf("possible candidate for %d: row %d, col %d\n", num, i, j)
+// 					markCell(i, j, num)
+// 				}
+// 			}
+// 		}
 
-	// find empty non-selected cells
-	for i := 0; i < 9; i++ {
-		for j := 0; j < 9; j++ {
-			if cells[i][j].selected == false {
-				if cells[i][j].num == 0 {
-					fmt.Printf("possible candidate for %d: row %d, col %d\n", num, i, j)
-					markCell(i, j, num)
-				}
-			}
-		}
+// 	}
 
-	}
-
-	printBoard()
-}
+// 	printBoard()
+// }
 
 func TestSelectCells(t *testing.T) {
 
