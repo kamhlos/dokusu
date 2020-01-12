@@ -1,6 +1,9 @@
 package main
 
-import "testing"
+import (
+	"fmt"
+	"testing"
+)
 
 func TestPrintBoard(t *testing.T) {
 
@@ -18,6 +21,20 @@ func TestPrintBoard(t *testing.T) {
 	// 	//printBoard()
 	// }
 
+}
+
+func TestInvalidPuzzle(t *testing.T) {
+
+	if err := mapNumberPositions(); err != nil {
+		fmt.Print(err)
+		return
+	}
+
+	// // first validate the given puzzle
+	// if err := validPuzzle(); err != nil {
+	// 	fmt.Print(err)
+	// 	return
+	// }
 }
 
 func TestRandomCells(t *testing.T) {
