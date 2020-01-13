@@ -13,103 +13,103 @@ var positions map[int][]pos
 // the puzzle
 var cells = [9][9]Cell{
 	[9]Cell{
-		Cell{num: 0, initial: true},
-		Cell{num: 0, initial: true},
-		Cell{num: 0, initial: true},
-		Cell{num: 0, initial: true},
-		Cell{num: 0, initial: true},
-		Cell{num: 0, initial: true},
-		Cell{num: 0, initial: true},
-		Cell{num: 0, initial: true},
-		Cell{num: 0, initial: true},
+		Cell{num: 0},
+		Cell{num: 0},
+		Cell{num: 0},
+		Cell{num: 0},
+		Cell{num: 0},
+		Cell{num: 0},
+		Cell{num: 0},
+		Cell{num: 0},
+		Cell{num: 0},
 	},
 	[9]Cell{
-		Cell{num: 0, initial: true},
-		Cell{num: 0, initial: true},
-		Cell{num: 0, initial: true},
-		Cell{num: 0, initial: true},
-		Cell{num: 0, initial: true},
-		Cell{num: 0, initial: true},
-		Cell{num: 0, initial: true},
-		Cell{num: 0, initial: true},
-		Cell{num: 0, initial: true},
+		Cell{num: 0},
+		Cell{num: 0},
+		Cell{num: 0},
+		Cell{num: 0},
+		Cell{num: 0},
+		Cell{num: 0},
+		Cell{num: 0},
+		Cell{num: 0},
+		Cell{num: 0},
 	},
 	[9]Cell{
-		Cell{num: 0, initial: true},
-		Cell{num: 0, initial: true},
-		Cell{num: 0, initial: true},
-		Cell{num: 0, initial: true},
-		Cell{num: 0, initial: true},
-		Cell{num: 0, initial: true},
-		Cell{num: 0, initial: true},
-		Cell{num: 0, initial: true},
-		Cell{num: 0, initial: true},
+		Cell{num: 0},
+		Cell{num: 0},
+		Cell{num: 0},
+		Cell{num: 9},
+		Cell{num: 8},
+		Cell{num: 0},
+		Cell{num: 0},
+		Cell{num: 0},
+		Cell{num: 0},
 	},
 	[9]Cell{
-		Cell{num: 0, initial: true},
-		Cell{num: 0, initial: true},
-		Cell{num: 0, initial: true},
-		Cell{num: 0, initial: true},
-		Cell{num: 0, initial: true},
-		Cell{num: 0, initial: true},
-		Cell{num: 0, initial: true},
-		Cell{num: 0, initial: true},
-		Cell{num: 0, initial: true},
+		Cell{num: 0},
+		Cell{num: 0},
+		Cell{num: 0},
+		Cell{num: 0},
+		Cell{num: 0},
+		Cell{num: 0},
+		Cell{num: 0},
+		Cell{num: 0},
+		Cell{num: 0},
 	},
 	[9]Cell{
-		Cell{num: 0, initial: true},
-		Cell{num: 0, initial: true},
-		Cell{num: 0, initial: true},
-		Cell{num: 0, initial: true},
-		Cell{num: 0, initial: true},
-		Cell{num: 0, initial: true},
-		Cell{num: 9, initial: true},
-		Cell{num: 0, initial: true},
-		Cell{num: 4, initial: true},
+		Cell{num: 0},
+		Cell{num: 0},
+		Cell{num: 0},
+		Cell{num: 0},
+		Cell{num: 0},
+		Cell{num: 0},
+		Cell{num: 9},
+		Cell{num: 0},
+		Cell{num: 4},
 	},
 	[9]Cell{
-		Cell{num: 0, initial: true},
-		Cell{num: 0, initial: true},
-		Cell{num: 4, initial: true},
-		Cell{num: 0, initial: true},
-		Cell{num: 0, initial: true},
-		Cell{num: 8, initial: true},
-		Cell{num: 6, initial: true},
-		Cell{num: 2, initial: true},
-		Cell{num: 0, initial: true},
+		Cell{num: 0},
+		Cell{num: 0},
+		Cell{num: 4},
+		Cell{num: 0},
+		Cell{num: 0},
+		Cell{num: 8},
+		Cell{num: 6},
+		Cell{num: 2},
+		Cell{num: 0},
 	},
 	[9]Cell{
-		Cell{num: 0, initial: true},
-		Cell{num: 0, initial: true},
-		Cell{num: 0, initial: true},
-		Cell{num: 0, initial: true},
-		Cell{num: 0, initial: true},
-		Cell{num: 0, initial: true},
-		Cell{num: 2, initial: true},
-		Cell{num: 0, initial: true},
-		Cell{num: 3, initial: true},
+		Cell{num: 0},
+		Cell{num: 0},
+		Cell{num: 0},
+		Cell{num: 0},
+		Cell{num: 0},
+		Cell{num: 9},
+		Cell{num: 2},
+		Cell{num: 0},
+		Cell{num: 3},
 	},
 	[9]Cell{
-		Cell{num: 4, initial: true},
-		Cell{num: 3, initial: true},
-		Cell{num: 0, initial: true},
-		Cell{num: 0, initial: true},
-		Cell{num: 6, initial: true},
-		Cell{num: 1, initial: true},
-		Cell{num: 0, initial: true},
-		Cell{num: 5, initial: true},
-		Cell{num: 0, initial: true},
+		Cell{num: 4},
+		Cell{num: 3},
+		Cell{num: 9},
+		Cell{num: 0},
+		Cell{num: 6},
+		Cell{num: 1},
+		Cell{num: 0},
+		Cell{num: 5},
+		Cell{num: 0},
 	},
 	[9]Cell{
-		Cell{num: 9, initial: true},
-		Cell{num: 1, initial: true},
-		Cell{num: 0, initial: true},
-		Cell{num: 8, initial: true},
-		Cell{num: 0, initial: true},
-		Cell{num: 5, initial: true},
-		Cell{num: 4, initial: true},
-		Cell{num: 7, initial: true},
-		Cell{num: 6, initial: true},
+		Cell{num: 9},
+		Cell{num: 1},
+		Cell{num: 0},
+		Cell{num: 8},
+		Cell{num: 0},
+		Cell{num: 5},
+		Cell{num: 4},
+		Cell{num: 7},
+		Cell{num: 6},
 	},
 }
 
@@ -125,12 +125,13 @@ func mapNumberPositions() error {
 			number := cells[i][j].num
 
 			if number < 0 || number > 9 {
+				cells[i][j].selected = true
 				return fmt.Errorf("invalid puzzle:%d is not a valid number", number)
 			}
 
 			cells[i][j].row = i
 			cells[i][j].col = j
-			if err := cells[i][j].SetNumber(number); err != nil {
+			if err := cells[i][j].setNumber(number); err != nil {
 				return err
 			}
 
@@ -144,15 +145,15 @@ func mapNumberPositions() error {
 	}
 
 	// above loop produces a map of number positions:
-	for i := 0; i < 10; i++ {
-		fmt.Printf("number %d found in: %#v", i, positions[i])
-	}
+	// for i := 0; i < 10; i++ {
+	// 	fmt.Printf("number %d found in: %#v", i, positions[i])
+	// }
 
 	return nil
 }
 
 // SetNum for a cell
-func (c Cell) SetNumber(num int) error {
+func (c Cell) setNumber(num int) error {
 
 	// check before setting this cell's number
 
@@ -162,40 +163,49 @@ func (c Cell) SetNumber(num int) error {
 	}
 
 	// iterate over cell's row
-	for _, v := range cells[c.row] {
+	for i := 0; i < 9; i++ {
 
-		if v.col == c.col { // exclude this cell
+		//fmt.Printf("checking number: %d at row %d and column %d\n", num, c.row, i)
+
+		if i == c.col { // exclude this cell
+			//fmt.Printf("excluding col %d\n", i)
 			continue
 		}
 
-		if v.num == num { // check if this number already exists in row
-			return fmt.Errorf("error setting number '%d' for cell in row:%d and column:%d; this number already exists at column:%d", num, c.row, c.col, v.col)
+		if num == cells[c.row][i].num { // check if this number already exists in row
+			cells[c.row][i].invalid = true
+			return fmt.Errorf("error setting number '%d' for cell in row:%d; this number already exists at column:%d", num, c.row, i)
+
 		}
+
 	}
 
 	// iterate over cell's column
-	for k := range cells {
+	for i := 0; i < 9; i++ {
 
-		if k == c.row { // exclude this cell
+		if i == c.row {
 			continue
 		}
 
-		if cells[k][c.col].num == num { // check if this number already exists in column
-			return fmt.Errorf("error setting number '%d' for cell in column:%d and column:%d; this number already exists at row:%d", num, c.row, c.col, k)
+		if cells[i][c.col].num == num { // check if this number already exists in column
+			cells[i][c.col].invalid = true
+			return fmt.Errorf("error setting number '%d' for cell in column:%d; this number already exists at row:%d", num, c.col, i)
 		}
 	}
 
 	// iterate over cell's 9cell box
-	cellpos := c.Box()
+	cellpos := c.box()
 
 	for i := cellpos.row; i < cellpos.row+3; i++ {
 		for j := cellpos.col; j < cellpos.col+3; j++ {
 
-			// TODO:
-			//need to exclude this cell
+			if c.row == i && c.col == j {
+				continue // exclude this cell
+			}
 
 			if cells[i][j].num == num {
-				return fmt.Errorf("error setting number '%d' for cell in box:%d and column:%d; this number already exists at box row:%d and col:%d", num, c.row, c.col, i, j)
+				cells[i][j].invalid = true
+				return fmt.Errorf("error setting number '%d' for cell in box row:%d and column:%d; this number already exists at box row:%d and col:%d", num, c.row, c.col, i, j)
 			}
 		}
 	}
@@ -203,8 +213,8 @@ func (c Cell) SetNumber(num int) error {
 	return nil
 }
 
-// Box returns a cell's first 9 cell box {position} (upper left most cell)
-func (c Cell) Box() pos {
+// box returns a cell's first 9 cell box {position} (upper left most cell)
+func (c Cell) box() pos {
 
 	var position pos
 
@@ -292,12 +302,10 @@ func (c Cell) Content() string {
 		number = fmt.Sprintf("%d", c.num)
 	}
 
-	if !c.initial {
-		if c.valid {
-			color = "92"
-		} else {
-			color = "31"
-		}
+	if c.invalid {
+		color = "31"
+	} else {
+		color = "92"
 	}
 
 	return "\033[0;" + color + "m" + number + "\033[0m"
@@ -326,19 +334,18 @@ func validPuzzle() error {
 
 	return nil
 }
+
 func main() {
 
-	// first validate the given puzzle
-	if err := validPuzzle(); err != nil {
-		fmt.Print(err)
-		return
+	if err := mapNumberPositions(); err != nil {
+		fmt.Println(err)
 	}
 
 	//num := getNumber()
 	// crosshatch()
 	// randomCells()
 
-	// printBoard()
+	printBoard()
 
 	// printBoard()
 

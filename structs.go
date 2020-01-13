@@ -10,8 +10,7 @@ type Cell struct {
 	num      int
 	row      int
 	col      int
-	initial  bool  // initiallly given numbers have a default color
-	valid    bool  // those have a red or green color
+	invalid  bool  // those have a red or green color
 	selected bool  // selected cells have a magenta color
 	marks    []int // other num candidates (if num = 0)
 }
@@ -101,29 +100,29 @@ type Cell struct {
 // }
 
 const (
-	Reset      = "\x1b[0m"
-	Bright     = "\x1b[1m"
-	Dim        = "\x1b[2m"
-	Underscore = "\x1b[4m"
-	Blink      = "\x1b[5m"
-	Reverse    = "\x1b[7m"
-	Hidden     = "\x1b[8m"
+	cReset      = "\x1b[0m"
+	cBright     = "\x1b[1m"
+	cDim        = "\x1b[2m"
+	cUnderscore = "\x1b[4m"
+	cBlink      = "\x1b[5m"
+	cReverse    = "\x1b[7m"
+	cHidden     = "\x1b[8m"
 
-	FgBlack   = "\x1b[30m"
-	FgRed     = "\x1b[31m"
-	FgGreen   = "\x1b[32m"
-	FgYellow  = "\x1b[33m"
-	FgBlue    = "\x1b[34m"
-	FgMagenta = "\x1b[35m"
-	FgCyan    = "\x1b[36m"
-	FgWhite   = "\x1b[37m"
+	cFgBlack   = "\x1b[30m"
+	cFgRed     = "\x1b[31m"
+	cFgGreen   = "\x1b[32m"
+	cFgYellow  = "\x1b[33m"
+	cFgBlue    = "\x1b[34m"
+	cFgMagenta = "\x1b[35m"
+	cFgCyan    = "\x1b[36m"
+	cFgWhite   = "\x1b[37m"
 
-	BgBlack   = "\x1b[40m"
-	BgRed     = "\x1b[41m"
-	BgGreen   = "\x1b[42m"
-	BgYellow  = "\x1b[43m"
-	BgBlue    = "\x1b[44m"
-	BgMagenta = "\x1b[45m"
-	BgCyan    = "\x1b[46m"
-	BgWhite   = "\x1b[47m"
+	cBgBlack   = "\x1b[40m"
+	cBgRed     = "\x1b[41m"
+	cBgGreen   = "\x1b[42m"
+	cBgYellow  = "\x1b[43m"
+	cBgBlue    = "\x1b[44m"
+	cBgMagenta = "\x1b[45m"
+	cBgCyan    = "\x1b[46m"
+	cBgWhite   = "\x1b[47m"
 )
