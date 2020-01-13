@@ -13,54 +13,54 @@ var positions map[int][]pos
 // the puzzle
 var cells = [9][9]Cell{
 	[9]Cell{
-		Cell{num: 8, initial: true},
-		Cell{num: 0, initial: true},
-		Cell{num: 5, initial: true},
 		Cell{num: 0, initial: true},
 		Cell{num: 0, initial: true},
-		Cell{num: 9, initial: true},
-		Cell{num: 7, initial: true},
-		Cell{num: 4, initial: true},
-		Cell{num: 0, initial: true},
-	},
-	[9]Cell{
 		Cell{num: 0, initial: true},
 		Cell{num: 0, initial: true},
-		Cell{num: 3, initial: true},
 		Cell{num: 0, initial: true},
-		Cell{num: 8, initial: true},
-		Cell{num: 6, initial: true},
 		Cell{num: 0, initial: true},
-		Cell{num: 9, initial: true},
-		Cell{num: 0, initial: true},
-	},
-	[9]Cell{
-		Cell{num: 0, initial: true},
-		Cell{num: 9, initial: true},
-		Cell{num: 0, initial: true},
-		Cell{num: 4, initial: true},
-		Cell{num: 0, initial: true},
-		Cell{num: 2, initial: true},
-		Cell{num: 0, initial: true},
-		Cell{num: 6, initial: true},
-		Cell{num: 0, initial: true},
-	},
-	[9]Cell{
-		Cell{num: 0, initial: true},
-		Cell{num: 2, initial: true},
-		Cell{num: 0, initial: true},
-		Cell{num: 5, initial: true},
-		Cell{num: 0, initial: true},
-		Cell{num: 3, initial: true},
 		Cell{num: 0, initial: true},
 		Cell{num: 0, initial: true},
 		Cell{num: 0, initial: true},
 	},
 	[9]Cell{
 		Cell{num: 0, initial: true},
-		Cell{num: 5, initial: true},
 		Cell{num: 0, initial: true},
-		Cell{num: 6, initial: true},
+		Cell{num: 0, initial: true},
+		Cell{num: 0, initial: true},
+		Cell{num: 0, initial: true},
+		Cell{num: 0, initial: true},
+		Cell{num: 0, initial: true},
+		Cell{num: 0, initial: true},
+		Cell{num: 0, initial: true},
+	},
+	[9]Cell{
+		Cell{num: 0, initial: true},
+		Cell{num: 0, initial: true},
+		Cell{num: 0, initial: true},
+		Cell{num: 0, initial: true},
+		Cell{num: 0, initial: true},
+		Cell{num: 0, initial: true},
+		Cell{num: 0, initial: true},
+		Cell{num: 0, initial: true},
+		Cell{num: 0, initial: true},
+	},
+	[9]Cell{
+		Cell{num: 0, initial: true},
+		Cell{num: 0, initial: true},
+		Cell{num: 0, initial: true},
+		Cell{num: 0, initial: true},
+		Cell{num: 0, initial: true},
+		Cell{num: 0, initial: true},
+		Cell{num: 0, initial: true},
+		Cell{num: 0, initial: true},
+		Cell{num: 0, initial: true},
+	},
+	[9]Cell{
+		Cell{num: 0, initial: true},
+		Cell{num: 0, initial: true},
+		Cell{num: 0, initial: true},
+		Cell{num: 0, initial: true},
 		Cell{num: 0, initial: true},
 		Cell{num: 0, initial: true},
 		Cell{num: 9, initial: true},
@@ -121,9 +121,6 @@ func mapNumberPositions() error {
 		for j := 0; j < 9; j++ {
 			// iterate over all cells
 			// map existing numbers to locations
-			var position pos
-			position.row = i
-			position.col = j
 
 			number := cells[i][j].num
 
@@ -131,6 +128,16 @@ func mapNumberPositions() error {
 				return fmt.Errorf("invalid puzzle:%d is not a valid number", number)
 			}
 
+			cells[i][j].row = i
+			cells[i][j].col = j
+			if err := cells[i][j].SetNumber(number); err != nil {
+				return err
+			}
+
+			// register this position for this number
+			var position pos
+			position.row = i
+			position.col = j
 			positions[number] = append(positions[number], position)
 
 		}
@@ -142,6 +149,73 @@ func mapNumberPositions() error {
 	}
 
 	return nil
+}
+
+// SetNum for a cell
+func (c Cell) SetNumber(num int) error {
+
+	// check before setting this cell's number
+
+	// but exclude 0's
+	if num == 0 {
+		return nil
+	}
+
+	// iterate over cell's row
+	for _, v := range cells[c.row] {
+
+		if v.col == c.col { // exclude this cell
+			continue
+		}
+
+		if v.num == num { // check if this number already exists in row
+			return fmt.Errorf("error setting number '%d' for cell in row:%d and column:%d; this number already exists at column:%d", num, c.row, c.col, v.col)
+		}
+	}
+
+	// iterate over cell's column
+	for k := range cells {
+
+		if k == c.row { // exclude this cell
+			continue
+		}
+
+		if cells[k][c.col].num == num { // check if this number already exists in column
+			return fmt.Errorf("error setting number '%d' for cell in column:%d and column:%d; this number already exists at row:%d", num, c.row, c.col, k)
+		}
+	}
+
+	// iterate over cell's 9cell box
+	cellpos := c.Box()
+
+	for i := cellpos.row; i < cellpos.row+3; i++ {
+		for j := cellpos.col; j < cellpos.col+3; j++ {
+
+			// TODO:
+			//need to exclude this cell
+
+			if cells[i][j].num == num {
+				return fmt.Errorf("error setting number '%d' for cell in box:%d and column:%d; this number already exists at box row:%d and col:%d", num, c.row, c.col, i, j)
+			}
+		}
+	}
+
+	return nil
+}
+
+// Box returns a cell's first 9 cell box {position} (upper left most cell)
+func (c Cell) Box() pos {
+
+	var position pos
+
+	// calculate the first cell, division, then multiply by 3
+	crd3 := c.row / 3
+	ccd3 := c.col / 3
+
+	position.row = crd3 * 3
+	position.col = ccd3 * 3
+
+	return position
 }
 
 // selects rows and columns containing a given number
