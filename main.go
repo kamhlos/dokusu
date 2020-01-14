@@ -101,7 +101,7 @@ var cells = [9][9]Cell{
 		Cell{num: 0},
 	},
 	[9]Cell{
-		Cell{num: 9},
+		Cell{num: 0},
 		Cell{num: 1},
 		Cell{num: 0},
 		Cell{num: 8},
@@ -258,8 +258,8 @@ func selectCells(row int, col int) error {
 		return fmt.Errorf("column out of range: %d", col)
 	}
 
-	// first select this cell
-	cells[row][col].selected = true
+	// activate this cell
+	cells[row][col].active = true
 
 	// there is no point in selecting an empty cell
 	if cells[row][col].num == 0 {
@@ -287,52 +287,35 @@ func markCell(row int, col int, num int) {
 // Content prints a cell's number as a string
 func (c Cell) Content() string {
 
-	var number string
+	var number, color string
 
-	color := "97" // default is white foreground color
-
-	if c.selected {
-		color = "96" // cyan foreground color
-	}
+	color = "37" // default is white foreground color
 
 	// zero-numbered cells shown as empty
 	if c.num == 0 {
+		color = "8" // 8 hides the character, see structs
 		number = " "
 	} else {
 		number = fmt.Sprintf("%d", c.num)
 	}
 
+	if c.selected {
+		color = "4" // see structs for colors
+	}
+
+	if c.active {
+		color = "36"
+	}
+
 	if c.invalid {
 		color = "31"
-	} else {
-		color = "92"
 	}
 
 	return "\033[0;" + color + "m" + number + "\033[0m"
 }
 
-func validPuzzle() error {
-
-	// TODO:
-	// validate current number positions
-	// return error if puzzle is not valid
-	// RULES for validation:
-	// each row/column/9cell box has no more than one copy of each number of 1 to 9
-	// for k, v := range positions {
-
-	// 	// each number must appear only once in a row
-	// 	// with the exception of 0
-	// 	//
-	// 	for pos := range v {
-	// 		// debug
-	// 		fmt.Printf("checking number: %d\n", pos)
-	// 		fmt.Printf("%#v\n", v)
-	// 		fmt.Printf("------------------------ DEBUG -------------------------\n")
-	// 	}
-
-	// }
-
-	return nil
+func clearConsole() {
+	fmt.Println("\033[2J")
 }
 
 func main() {
@@ -341,13 +324,15 @@ func main() {
 		fmt.Println(err)
 	}
 
-	//num := getNumber()
-	// crosshatch()
-	// randomCells()
+	// printBoard()
+
+	num := getNumber()
+
+	if err := selectNumber(num); err != nil {
+		fmt.Println(err)
+	}
 
 	printBoard()
-
-	// printBoard()
 
 	// fmt.Printf("\n\n")
 }
@@ -418,34 +403,8 @@ func getNumber() int {
 	return num
 }
 
-func randomCells() {
-
-	// r := rand.New(rand.NewSource(time.Now().UnixNano()))
-
-	// for i := 0; i < 9; i++ {
-	// 	for j := 0; j < 9; j++ {
-	// 		cells[i][j].num = r.Intn(9) + 1
-	// 	}
-	// }
-
-	// for i := 0; i < 9; i++ {
-	// 	ec := r.Intn(10)
-	// 	cells[i][ec] = " "
-	// 	cells[i][ec+r.Intn(n)] = " "
-	// }
-}
-
-// func validateCell(cell [9][9]string) bool {
-// 	// TODO:
-// 	// logic to validate each cell
-
-// 	return false
-// }
-
 // prints the board with the cells contents if num not zero
 func printBoard() {
-
-	fmt.Println("\033[2J")
 
 	// START first row of boxes
 

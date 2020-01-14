@@ -10,7 +10,8 @@ type Cell struct {
 	num      int
 	row      int
 	col      int
-	invalid  bool  // those have a red or green color
+	invalid  bool // those have a red or green color
+	active   bool
 	selected bool  // selected cells have a magenta color
 	marks    []int // other num candidates (if num = 0)
 }
