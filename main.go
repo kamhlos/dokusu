@@ -2,7 +2,9 @@ package main
 
 import (
 	"bufio"
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"strconv"
 )
@@ -11,106 +13,21 @@ import (
 var positions map[int][]pos
 
 // the puzzle
-var cells = [9][9]Cell{
-	[9]Cell{
-		Cell{num: 0},
-		Cell{num: 0},
-		Cell{num: 0},
-		Cell{num: 0},
-		Cell{num: 0},
-		Cell{num: 0},
-		Cell{num: 0},
-		Cell{num: 0},
-		Cell{num: 0},
-	},
-	[9]Cell{
-		Cell{num: 0},
-		Cell{num: 0},
-		Cell{num: 0},
-		Cell{num: 0},
-		Cell{num: 0},
-		Cell{num: 0},
-		Cell{num: 0},
-		Cell{num: 0},
-		Cell{num: 0},
-	},
-	[9]Cell{
-		Cell{num: 0},
-		Cell{num: 0},
-		Cell{num: 0},
-		Cell{num: 9},
-		Cell{num: 8},
-		Cell{num: 0},
-		Cell{num: 0},
-		Cell{num: 0},
-		Cell{num: 0},
-	},
-	[9]Cell{
-		Cell{num: 0},
-		Cell{num: 0},
-		Cell{num: 0},
-		Cell{num: 0},
-		Cell{num: 0},
-		Cell{num: 0},
-		Cell{num: 0},
-		Cell{num: 0},
-		Cell{num: 0},
-	},
-	[9]Cell{
-		Cell{num: 0},
-		Cell{num: 0},
-		Cell{num: 0},
-		Cell{num: 0},
-		Cell{num: 0},
-		Cell{num: 0},
-		Cell{num: 9},
-		Cell{num: 0},
-		Cell{num: 4},
-	},
-	[9]Cell{
-		Cell{num: 0},
-		Cell{num: 0},
-		Cell{num: 4},
-		Cell{num: 0},
-		Cell{num: 0},
-		Cell{num: 8},
-		Cell{num: 6},
-		Cell{num: 2},
-		Cell{num: 0},
-	},
-	[9]Cell{
-		Cell{num: 0},
-		Cell{num: 0},
-		Cell{num: 0},
-		Cell{num: 0},
-		Cell{num: 0},
-		Cell{num: 9},
-		Cell{num: 2},
-		Cell{num: 0},
-		Cell{num: 3},
-	},
-	[9]Cell{
-		Cell{num: 4},
-		Cell{num: 3},
-		Cell{num: 9},
-		Cell{num: 0},
-		Cell{num: 6},
-		Cell{num: 1},
-		Cell{num: 0},
-		Cell{num: 5},
-		Cell{num: 0},
-	},
-	[9]Cell{
-		Cell{num: 0},
-		Cell{num: 1},
-		Cell{num: 0},
-		Cell{num: 8},
-		Cell{num: 0},
-		Cell{num: 5},
-		Cell{num: 4},
-		Cell{num: 7},
-		Cell{num: 6},
-	},
+var cells [9][9]*Cell
+
+func loadPuzzle() error {
+
+	j, err := ioutil.ReadFile("puzzle.json")
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(j, &cells)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func mapNumberPositions() error {
@@ -122,7 +39,7 @@ func mapNumberPositions() error {
 			// iterate over all cells
 			// map existing numbers to locations
 
-			number := cells[i][j].num
+			number := cells[i][j].Number
 
 			if number < 0 || number > 9 {
 				cells[i][j].selected = true
@@ -172,7 +89,7 @@ func (c Cell) setNumber(num int) error {
 			continue
 		}
 
-		if num == cells[c.row][i].num { // check if this number already exists in row
+		if num == cells[c.row][i].Number { // check if this number already exists in row
 			cells[c.row][i].invalid = true
 			return fmt.Errorf("error setting number '%d' for cell in row:%d; this number already exists at column:%d", num, c.row, i)
 
@@ -187,7 +104,7 @@ func (c Cell) setNumber(num int) error {
 			continue
 		}
 
-		if cells[i][c.col].num == num { // check if this number already exists in column
+		if cells[i][c.col].Number == num { // check if this number already exists in column
 			cells[i][c.col].invalid = true
 			return fmt.Errorf("error setting number '%d' for cell in column:%d; this number already exists at row:%d", num, c.col, i)
 		}
@@ -203,7 +120,7 @@ func (c Cell) setNumber(num int) error {
 				continue // exclude this cell
 			}
 
-			if cells[i][j].num == num {
+			if cells[i][j].Number == num {
 				cells[i][j].invalid = true
 				return fmt.Errorf("error setting number '%d' for cell in box row:%d and column:%d; this number already exists at box row:%d and col:%d", num, c.row, c.col, i, j)
 			}
@@ -262,7 +179,7 @@ func selectCells(row int, col int) error {
 	cells[row][col].active = true
 
 	// there is no point in selecting an empty cell
-	if cells[row][col].num == 0 {
+	if cells[row][col].Number == 0 {
 		return fmt.Errorf("%s", "cannot select an empty cell")
 	}
 
@@ -279,8 +196,52 @@ func selectCells(row int, col int) error {
 	return nil
 }
 
+// find/mark possible cell positions for a number
+func possiblePos(num int) error {
+
+	// first select rows/columns containing this number
+	if err := selectNumber(num); err != nil {
+		return err
+	}
+
+	for i := 0; i < 9; i++ {
+		for j := 0; j < 9; j++ {
+
+			cells[i][j].marks = make([]int, 9)
+
+			if cells[i][j].selected == false && cells[i][j].Number == 0 {
+				markCell(i, j, num)
+			}
+		}
+	}
+
+	return nil
+}
+
+func showMarks(num int) {
+
+	count := 0
+
+	for i := 0; i < 9; i++ {
+		for j := 0; j < 9; j++ {
+			for k := 0; k < 9; k++ {
+				if cells[i][j].marks[k] == num {
+					cells[i][j].active = true
+					count += 1
+				}
+			}
+		}
+	}
+
+	fmt.Printf("showing marks for number %d:", num)
+	fmt.Printf("%d possible cell positions\n", count)
+}
+
 // mark a possible candidate number for a cell
 func markCell(row int, col int, num int) {
+
+	//fmt.Printf("mark cell(%d, %d) for number %d\n", row, col, num)
+
 	cells[row][col].marks = append(cells[row][col].marks, num)
 }
 
@@ -292,11 +253,11 @@ func (c Cell) Content() string {
 	color = "37" // default is white foreground color
 
 	// zero-numbered cells shown as empty
-	if c.num == 0 {
+	if c.Number == 0 {
 		color = "8" // 8 hides the character, see structs
 		number = " "
 	} else {
-		number = fmt.Sprintf("%d", c.num)
+		number = fmt.Sprintf("%d", c.Number)
 	}
 
 	if c.selected {
@@ -320,21 +281,23 @@ func clearConsole() {
 
 func main() {
 
+	if err := loadPuzzle(); err != nil {
+		panic(err)
+	}
+
 	if err := mapNumberPositions(); err != nil {
 		fmt.Println(err)
 	}
 
-	// printBoard()
-
 	num := getNumber()
 
-	if err := selectNumber(num); err != nil {
+	if err := possiblePos(num); err != nil {
 		fmt.Println(err)
 	}
 
-	printBoard()
+	showMarks(num)
 
-	// fmt.Printf("\n\n")
+	printBoard()
 }
 
 // difficulty measured by the count of 0's;
@@ -367,7 +330,7 @@ func crosshatch() {
 	// 	for j := 0; j < 9; j++ {
 	// 		// iterate over all cells
 	// 		// map existing numbers to locations
-	// 		location[cells[i][j].num] = append(location[cells[i][j].num], fmt.Sprintf("row:%d", i)+fmt.Sprintf("col:%d", j))
+	// 		location[cells[i][j].Number] = append(location[cells[i][j].Number], fmt.Sprintf("row:%d", i)+fmt.Sprintf("col:%d", j))
 
 	// 	}
 	// }
