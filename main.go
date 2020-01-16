@@ -10,7 +10,10 @@ import (
 )
 
 // map of number location in cells
-var positions map[int][]pos
+var positions map[int][]Position
+
+// map of candidate cells for a number
+var candidates map[int][]Position
 
 // the puzzle
 var cells [9][9]*Cell
@@ -27,12 +30,16 @@ func loadPuzzle() error {
 		return err
 	}
 
+	if err := mapNumberPositions(); err != nil {
+		return err
+	}
+
 	return nil
 }
 
 func mapNumberPositions() error {
 
-	positions = make(map[int][]pos)
+	positions = make(map[int][]Position)
 
 	for i := 0; i < 9; i++ {
 		for j := 0; j < 9; j++ {
@@ -53,10 +60,10 @@ func mapNumberPositions() error {
 			}
 
 			// register this position for this number
-			var position pos
-			position.row = i
-			position.col = j
-			positions[number] = append(positions[number], position)
+			var pos Position
+			pos.row = i
+			pos.col = j
+			positions[number] = append(positions[number], pos)
 
 		}
 	}
@@ -131,18 +138,18 @@ func (c Cell) setNumber(num int) error {
 }
 
 // box returns a cell's first 9 cell box {position} (upper left most cell)
-func (c Cell) box() pos {
+func (c Cell) box() Position {
 
-	var position pos
+	var pos Position
 
 	// calculate the first cell, division, then multiply by 3
 	crd3 := c.row / 3
 	ccd3 := c.col / 3
 
-	position.row = crd3 * 3
-	position.col = ccd3 * 3
+	pos.row = crd3 * 3
+	pos.col = ccd3 * 3
 
-	return position
+	return pos
 }
 
 // selects rows and columns containing a given number
@@ -150,8 +157,6 @@ func selectNumber(num int) error {
 
 	// first find the cells (positions) containing this number
 	numpos := positions[num]
-
-	fmt.Printf("number %d found in %d cells\n", num, len(numpos))
 
 	// select(highlight) rows and columns of those cells
 	for _, v := range numpos {
@@ -163,7 +168,7 @@ func selectNumber(num int) error {
 	return nil
 }
 
-// selects a row and a column of given cell position
+// selects a box, row and a column of a given cell position
 func selectCells(row int, col int) error {
 
 	// cannot select out of range
@@ -175,7 +180,7 @@ func selectCells(row int, col int) error {
 		return fmt.Errorf("column out of range: %d", col)
 	}
 
-	// activate this cell
+	// activate this cell to show number's position
 	cells[row][col].active = true
 
 	// there is no point in selecting an empty cell
@@ -193,48 +198,40 @@ func selectCells(row int, col int) error {
 		cells[k][col].selected = true
 	}
 
+	// finally select those within that box
+	box := cells[row][col].box()
+	for k := box.row; k < box.row+3; k++ {
+		for l := box.col; l < box.col+3; l++ {
+			cells[k][l].selected = true
+		}
+	}
+
 	return nil
 }
 
 // find/mark possible cell positions for a number
 func possiblePos(num int) error {
 
-	// first select rows/columns containing this number
-	if err := selectNumber(num); err != nil {
-		return err
-	}
+	candidates = make(map[int][]Position)
 
 	for i := 0; i < 9; i++ {
 		for j := 0; j < 9; j++ {
 
 			cells[i][j].marks = make([]int, 9)
 
+			// every non-selected AND empty cell can accept a mark of this number
 			if cells[i][j].selected == false && cells[i][j].Number == 0 {
 				markCell(i, j, num)
+
+				var pos Position
+				pos.row = i
+				pos.col = j
+				candidates[num] = append(candidates[num], pos)
 			}
 		}
 	}
 
 	return nil
-}
-
-func showMarks(num int) {
-
-	count := 0
-
-	for i := 0; i < 9; i++ {
-		for j := 0; j < 9; j++ {
-			for k := 0; k < 9; k++ {
-				if cells[i][j].marks[k] == num {
-					cells[i][j].active = true
-					count += 1
-				}
-			}
-		}
-	}
-
-	fmt.Printf("showing marks for number %d:", num)
-	fmt.Printf("%d possible cell positions\n", count)
 }
 
 // mark a possible candidate number for a cell
@@ -261,7 +258,7 @@ func (c Cell) Content() string {
 	}
 
 	if c.selected {
-		color = "4" // see structs for colors
+		color = "46" // see structs for colors
 	}
 
 	if c.active {
@@ -279,25 +276,68 @@ func clearConsole() {
 	fmt.Println("\033[2J")
 }
 
+func clearSelected() {
+	for i := 0; i < 9; i++ {
+		for j := 0; j < 9; j++ {
+			cells[i][j].selected = false
+		}
+	}
+}
+
+func clearActive() {
+	for i := 0; i < 9; i++ {
+		for j := 0; j < 9; j++ {
+			cells[i][j].active = false
+		}
+	}
+}
+
 func main() {
 
+	// load puzzle from puzzle.json file
 	if err := loadPuzzle(); err != nil {
 		panic(err)
 	}
 
-	if err := mapNumberPositions(); err != nil {
-		fmt.Println(err)
-	}
-
-	num := getNumber()
-
-	if err := possiblePos(num); err != nil {
-		fmt.Println(err)
-	}
-
-	showMarks(num)
-
+	// show initial puzzle state
 	printBoard()
+
+	var num int // search using crosshatch method
+	num = getNumber()
+
+	for {
+
+		if err := selectNumber(num); err != nil {
+			fmt.Println(err)
+		}
+
+		clearConsole()
+
+		printBoard()
+
+		if err := possiblePos(num); err != nil {
+			fmt.Println(err)
+		}
+
+		clearSelected()
+
+		for _, v := range candidates[num] {
+			//fmt.Printf("row %d, col %d\n", v.row, v.col)
+			cells[v.row][v.col].selected = true
+		}
+
+		clearConsole()
+
+		fmt.Printf("Number %d found in %d cells\n", num, len(positions[num]))
+		fmt.Printf("%d possible cell positions for number %d:\n", len(candidates[num]), num)
+
+		printBoard()
+
+		// get a new number to crosshatch
+		num = getNumber()
+		clearActive()
+	}
+
 }
 
 // difficulty measured by the count of 0's;

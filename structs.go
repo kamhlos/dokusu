@@ -1,6 +1,6 @@
 package main
 
-type pos struct {
+type Position struct {
 	row int
 	col int
 }
