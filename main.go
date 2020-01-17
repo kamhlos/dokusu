@@ -258,11 +258,11 @@ func (c Cell) Content() string {
 	}
 
 	if c.selected {
-		color = "46" // see structs for colors
+		color = "42" // see structs for colors
 	}
 
 	if c.active {
-		color = "36"
+		color = "35"
 	}
 
 	if c.invalid {
@@ -329,7 +329,7 @@ func main() {
 		clearConsole()
 
 		fmt.Printf("Number %d found in %d cells\n", num, len(positions[num]))
-		fmt.Printf("%d possible cell positions for number %d:\n", len(candidates[num]), num)
+		fmt.Printf("%d candidate cells for number %d:\n", len(candidates[num]), num)
 
 		printBoard()
 
