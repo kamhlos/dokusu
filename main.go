@@ -360,8 +360,6 @@ func crosshatch(num int) {
 		pos := candidates[num][0]
 		putSolution(num, pos)
 
-		// remove this
-		delete(candidates, num)
 		return
 	}
 
@@ -371,15 +369,29 @@ func crosshatch(num int) {
 		// current position
 		pos := candidates[num][i]
 
-		fmt.Printf("candidate at row %d and col %d", pos.row, pos.col)
-
 		// testing algorithm: surrounding cells
 		// if no other candidate appears in the surrounding cells
 		// assume this is the solution
-		// TODO
+		for _, v := range getSurroundingCells(pos) {
+			if v.row != i.row {
+				if v.pos != i.pos {
+					// this is the solution?
+					putSolution(num, pos)
+				}
+			}
+		}
 
 	}
 
+}
+
+// TODO
+// get all cells next to a given position
+func getSurroundingCells(pos Position) {
+
+	var positions []Position
+
+	return positions
 }
 
 // puts a number to an empty cell and sets 'solved' to true
@@ -399,6 +411,7 @@ func putSolution(num int, pos Position) {
 		return
 	}
 
+	cells[pos.row][pos.col].Number = num
 	cells[pos.row][pos.col].solved = true
 }
 
