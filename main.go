@@ -373,8 +373,8 @@ func crosshatch(num int) {
 		// if no other candidate appears in the surrounding cells
 		// assume this is the solution
 		for _, v := range getSurroundingCells(pos) {
-			if v.row != i.row {
-				if v.pos != i.pos {
+			if v.row != pos.row {
+				if v.col != pos.col {
 					// this is the solution?
 					putSolution(num, pos)
 				}
@@ -387,7 +387,7 @@ func crosshatch(num int) {
 
 // TODO
 // get all cells next to a given position
-func getSurroundingCells(pos Position) {
+func getSurroundingCells(pos Position) []Position {
 
 	var positions []Position
 
