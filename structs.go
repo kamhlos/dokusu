@@ -12,8 +12,10 @@ type Cell struct {
 	col      int
 	invalid  bool // those have a red or green color
 	active   bool
-	selected bool  // selected cells have a magenta color
+	selected bool  // used for cross-hatching
+	candid   bool  // used for candidate positions for the active number
 	marks    []int // other number candidates (if number = 0)
+	solved   bool
 }
 
 const (

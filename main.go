@@ -209,8 +209,8 @@ func selectCells(row int, col int) error {
 	return nil
 }
 
-// find/mark possible cell positions for a number
-func possiblePos(num int) error {
+// find/mark candidate cell positions for a number
+func candidPos(num int) error {
 
 	candidates = make(map[int][]Position)
 
@@ -220,26 +220,28 @@ func possiblePos(num int) error {
 			cells[i][j].marks = make([]int, 9)
 
 			// every non-selected AND empty cell can accept a mark of this number
-			if cells[i][j].selected == false && cells[i][j].Number == 0 {
-				markCell(i, j, num)
+			if cells[i][j].selected == false {
 
-				var pos Position
-				pos.row = i
-				pos.col = j
-				candidates[num] = append(candidates[num], pos)
+				if cells[i][j].Number == 0 {
+
+					// add mark to this cell as a candidate number
+					cells[i][j].marks = append(cells[i][j].marks, num)
+
+					// add this cell as a candidate position for this number
+					var pos Position
+					pos.row = i
+					pos.col = j
+					candidates[num] = append(candidates[num], pos)
+				}
+
+			} else {
+				// remove from selected
+				cells[i][j].selected = false
 			}
 		}
 	}
 
 	return nil
-}
-
-// mark a possible candidate number for a cell
-func markCell(row int, col int, num int) {
-
-	//fmt.Printf("mark cell(%d, %d) for number %d\n", row, col, num)
-
-	cells[row][col].marks = append(cells[row][col].marks, num)
 }
 
 // Content prints a cell's number as a string
@@ -249,24 +251,27 @@ func (c Cell) Content() string {
 
 	color = "37" // default is white foreground color
 
-	// zero-numbered cells shown as empty
-	if c.Number == 0 {
-		color = "8" // 8 hides the character, see structs
-		number = " "
-	} else {
-		number = fmt.Sprintf("%d", c.Number)
-	}
-
-	if c.selected {
-		color = "42" // see structs for colors
+	if c.invalid {
+		color = "31"
 	}
 
 	if c.active {
 		color = "35"
 	}
 
-	if c.invalid {
-		color = "31"
+	if c.solved {
+		color = "1"
+	}
+
+	// zero-numbered cells shown as empty
+	if c.Number == 0 {
+		number = " "
+	} else {
+		number = fmt.Sprintf("%d", c.Number)
+	}
+
+	if c.candid {
+		color = "42" // see structs for colors
 	}
 
 	return "\033[0;" + color + "m" + number + "\033[0m"
@@ -288,6 +293,7 @@ func clearActive() {
 	for i := 0; i < 9; i++ {
 		for j := 0; j < 9; j++ {
 			cells[i][j].active = false
+			cells[i][j].candid = false
 		}
 	}
 }
@@ -300,6 +306,7 @@ func main() {
 	}
 
 	// show initial puzzle state
+	fmt.Printf("new puzzle, difficulty: %s\n", difficulty())
 	printBoard()
 
 	var num int // search using crosshatch method
@@ -307,23 +314,20 @@ func main() {
 
 	for {
 
+		// select cells associated with this number;
+		// rows, columns and 9cell boxes
 		if err := selectNumber(num); err != nil {
 			fmt.Println(err)
 		}
 
-		clearConsole()
-
-		printBoard()
-
-		if err := possiblePos(num); err != nil {
+		// from selections above, find candidate cells for this number
+		if err := candidPos(num); err != nil {
 			fmt.Println(err)
 		}
 
-		clearSelected()
-
 		for _, v := range candidates[num] {
 			//fmt.Printf("row %d, col %d\n", v.row, v.col)
-			cells[v.row][v.col].selected = true
+			cells[v.row][v.col].candid = true
 		}
 
 		clearConsole()
@@ -333,26 +337,13 @@ func main() {
 
 		printBoard()
 
+		crosshatch(num)
+
+		clearActive()
 		// get a new number to crosshatch
 		num = getNumber()
-		clearActive()
 	}
 
-}
-
-// difficulty measured by the count of 0's;
-// > 35 considered easy, < 25 hard
-func difficulty() string {
-
-	if len(positions[0]) > 35 {
-		return "easy"
-	}
-
-	if len(positions[0]) < 25 {
-		return "hard"
-	}
-
-	return fmt.Sprintf("count of 0's: %d", len(positions[0]))
 }
 
 // cross-hatching method:
@@ -362,18 +353,53 @@ func difficulty() string {
 // save all positions of that number
 // for each position, highlight all row and columns
 // find all row and columns which that number is missing
-func crosshatch() {
+func crosshatch(num int) {
 
-	// location := make(map[int][]string)
+	// easiest case; only one candidate
+	if len(candidates[num]) == 1 {
+		pos := candidates[num][0]
+		putSolution(num, pos)
 
-	// for i := 0; i < 9; i++ {
-	// 	for j := 0; j < 9; j++ {
-	// 		// iterate over all cells
-	// 		// map existing numbers to locations
-	// 		location[cells[i][j].Number] = append(location[cells[i][j].Number], fmt.Sprintf("row:%d", i)+fmt.Sprintf("col:%d", j))
+		// remove this
+		delete(candidates, num)
+		return
+	}
 
-	// 	}
-	// }
+	// iterate over candid positions for num
+	for i := 0; i < len(candidates[num]); i++ {
+
+		// current position
+		pos := candidates[num][i]
+
+		fmt.Printf("candidate at row %d and col %d", pos.row, pos.col)
+
+		// testing algorithm: surrounding cells
+		// if no other candidate appears in the surrounding cells
+		// assume this is the solution
+		// TODO
+
+	}
+
+}
+
+// puts a number to an empty cell and sets 'solved' to true
+// 'solved' cell's numbers appear brighter
+func putSolution(num int, pos Position) {
+
+	scanner := bufio.NewScanner(os.Stdin)
+	fmt.Printf("cell in row %d and col %d accepts the number %d, hit enter to complete\n", pos.row, pos.col, num)
+	scanner.Scan()
+
+	// the cell
+	c := cells[pos.row][pos.col]
+
+	// put solution and validate it
+	if err := c.setNumber(num); err != nil {
+		fmt.Println("error putting solution: ", err)
+		return
+	}
+
+	cells[pos.row][pos.col].solved = true
 }
 
 func getNumber() int {
@@ -490,4 +516,19 @@ func printNumberRow(n int) {
 	fmt.Printf("\u2503 %s \u2502 %s \u2502 %s \u2503", cells[n][0].Content(), cells[n][1].Content(), cells[n][2].Content())
 	fmt.Printf(" %s \u2502 %s \u2502 %s \u2503", cells[n][3].Content(), cells[n][4].Content(), cells[n][5].Content())
 	fmt.Printf(" %s \u2502 %s \u2502 %s \u2503\n", cells[n][6].Content(), cells[n][7].Content(), cells[n][8].Content())
+}
+
+// difficulty measured by the count of 0's;
+// > 35 considered easy, < 25 hard
+func difficulty() string {
+
+	if len(positions[0]) > 35 {
+		return "easy"
+	}
+
+	if len(positions[0]) < 25 {
+		return "hard"
+	}
+
+	return fmt.Sprintf("count of 0's: %d", len(positions[0]))
 }
