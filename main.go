@@ -339,6 +339,8 @@ func main() {
 
 		crosshatch(num)
 
+		printBoard()
+
 		clearActive()
 		// get a new number to crosshatch
 		num = getNumber()
@@ -364,6 +366,7 @@ func crosshatch(num int) {
 	}
 
 	// iterate over candid positions for num
+
 	for i := 0; i < len(candidates[num]); i++ {
 
 		// current position
@@ -373,13 +376,12 @@ func crosshatch(num int) {
 		// if no other candidate appears in the surrounding cells
 		// assume this is the solution
 		for _, v := range getSurroundingCells(pos) {
-			if v.row != pos.row {
-				if v.col != pos.col {
-					// this is the solution?
-					putSolution(num, pos)
-				}
+			if v.row == pos.row && v.col == pos.col {
+				break
 			}
 		}
+
+		putSolution(num, pos)
 
 	}
 
@@ -389,7 +391,35 @@ func crosshatch(num int) {
 // get all cells next to a given position
 func getSurroundingCells(pos Position) []Position {
 
+	//fmt.Printf("checking adjacent cells for position %d, %d\n", pos.row, pos.col)
+
 	var positions []Position
+
+	for i := pos.row - 1; i < pos.row+2; i++ {
+
+		if i < 0 || i > 8 {
+			//fmt.Printf("ignoring out of index row %d\n", i)
+			continue
+		}
+
+		for j := pos.col - 1; j < pos.col+2; j++ {
+
+			//fmt.Printf("checking adjacent cell at row %d, col %d\n", i, j)
+
+			if j < 0 || j > 8 {
+				//fmt.Printf("ignoring out of index column %d\n", j)
+				continue
+			}
+
+			if i == pos.row && j == pos.col {
+				//fmt.Printf("ignoring own position\n")
+				continue
+			}
+
+			positions = append(positions, Position{row: i, col: j})
+
+		}
+	}
 
 	return positions
 }
