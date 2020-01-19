@@ -1,5 +1,6 @@
 package main
 
+// Position is a cell's row and column
 type Position struct {
 	row int
 	col int

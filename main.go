@@ -335,9 +335,15 @@ func main() {
 		fmt.Printf("Number %d found in %d cells\n", num, len(positions[num]))
 		fmt.Printf("%d candidate cells for number %d:\n", len(candidates[num]), num)
 
-		printBoard()
+		if pos, err := crosshatch(num); err != nil {
+			fmt.Println(err)
+		} else {
+			printBoard()
+			putSolution(num, pos)
 
-		crosshatch(num)
+			// reload mappings after a new solution
+			mapNumberPositions()
+		}
 
 		printBoard()
 
@@ -355,73 +361,72 @@ func main() {
 // save all positions of that number
 // for each position, highlight all row and columns
 // find all row and columns which that number is missing
-func crosshatch(num int) {
+func crosshatch(num int) (Position, error) {
+
+	var pos Position
 
 	// easiest case; only one candidate
 	if len(candidates[num]) == 1 {
-		pos := candidates[num][0]
-		putSolution(num, pos)
-
-		return
+		return candidates[num][0], nil
 	}
 
-	// iterate over candid positions for num
-
+	// iterate over candidate positions for this number
+candid:
 	for i := 0; i < len(candidates[num]); i++ {
 
 		// current position
-		pos := candidates[num][i]
+		pos = candidates[num][i]
 
-		// testing algorithm: surrounding cells
-		// if no other candidate appears in the surrounding cells
-		// assume this is the solution
-		for _, v := range getSurroundingCells(pos) {
-			if v.row == pos.row && v.col == pos.col {
-				break
-			}
-		}
-
-		putSolution(num, pos)
-
-	}
-
-}
-
-// TODO
-// get all cells next to a given position
-func getSurroundingCells(pos Position) []Position {
-
-	//fmt.Printf("checking adjacent cells for position %d, %d\n", pos.row, pos.col)
-
-	var positions []Position
-
-	for i := pos.row - 1; i < pos.row+2; i++ {
-
-		if i < 0 || i > 8 {
-			//fmt.Printf("ignoring out of index row %d\n", i)
-			continue
-		}
-
-		for j := pos.col - 1; j < pos.col+2; j++ {
-
-			//fmt.Printf("checking adjacent cell at row %d, col %d\n", i, j)
-
-			if j < 0 || j > 8 {
-				//fmt.Printf("ignoring out of index column %d\n", j)
+		// check all cells within this row
+		for col := 0; col < 9; col++ {
+			// except own position
+			if col == pos.col {
 				continue
 			}
 
-			if i == pos.row && j == pos.col {
-				//fmt.Printf("ignoring own position\n")
+			if cells[pos.row][col].Number == num {
+				continue candid
+			}
+		}
+
+		// check all cells within this column
+		for row := 0; row < 9; row++ {
+			// except own position
+			if row == pos.row {
 				continue
 			}
 
-			positions = append(positions, Position{row: i, col: j})
-
+			if cells[row][pos.col].Number == num {
+				continue candid
+			}
 		}
+
+		// check all cells within this box
+		box := cells[pos.row][pos.col].box()
+		for k := box.row; k < box.row+3; k++ {
+			for l := box.col; l < box.col+3; l++ {
+				// except own position
+				if k == pos.row && l == pos.col {
+					continue
+				}
+
+				if cells[k][l].Number == num {
+					continue candid
+				}
+
+				// check for other candidates(marks) within this box
+				for _, v := range cells[k][l].marks {
+					if num == v {
+						continue candid
+					}
+				}
+			}
+		}
+
+		return pos, nil
 	}
 
-	return positions
+	return pos, fmt.Errorf("no solutions for number %d", num)
 }
 
 // puts a number to an empty cell and sets 'solved' to true
