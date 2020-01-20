@@ -68,11 +68,6 @@ func mapNumberPositions() error {
 		}
 	}
 
-	// above loop produces a map of number positions:
-	// for i := 0; i < 10; i++ {
-	// 	fmt.Printf("number %d found in: %#v", i, positions[i])
-	// }
-
 	return nil
 }
 
@@ -89,10 +84,7 @@ func (c Cell) setNumber(num int) error {
 	// iterate over cell's row
 	for i := 0; i < 9; i++ {
 
-		//fmt.Printf("checking number: %d at row %d and column %d\n", num, c.row, i)
-
 		if i == c.col { // exclude this cell
-			//fmt.Printf("excluding col %d\n", i)
 			continue
 		}
 
@@ -277,27 +269,6 @@ func (c Cell) Content() string {
 	return "\033[0;" + color + "m" + number + "\033[0m"
 }
 
-func clearConsole() {
-	fmt.Println("\033[2J")
-}
-
-func clearSelected() {
-	for i := 0; i < 9; i++ {
-		for j := 0; j < 9; j++ {
-			cells[i][j].selected = false
-		}
-	}
-}
-
-func clearActive() {
-	for i := 0; i < 9; i++ {
-		for j := 0; j < 9; j++ {
-			cells[i][j].active = false
-			cells[i][j].candid = false
-		}
-	}
-}
-
 func main() {
 
 	// load puzzle from puzzle.json file
@@ -326,7 +297,6 @@ func main() {
 		}
 
 		for _, v := range candidates[num] {
-			//fmt.Printf("row %d, col %d\n", v.row, v.col)
 			cells[v.row][v.col].candid = true
 		}
 
@@ -427,6 +397,15 @@ candid:
 	}
 
 	return pos, fmt.Errorf("no solutions for number %d", num)
+}
+
+// second level crosshatch:
+// perform crossings on candidate cells within a box:
+// adjacent cell candidates eliminate neiboring box's row/cell
+// e.g: in row1 and third box, cells 1,7 and 1,8 eliminate second's box
+// candidates for row 1
+func crosshatch2nd(num) error {
+
 }
 
 // puts a number to an empty cell and sets 'solved' to true
@@ -570,13 +549,34 @@ func printNumberRow(n int) {
 // > 35 considered easy, < 25 hard
 func difficulty() string {
 
-	if len(positions[0]) > 35 {
+	if len(positions[0]) < 25 {
 		return "easy"
 	}
 
-	if len(positions[0]) < 25 {
+	if len(positions[0]) > 30 {
 		return "hard"
 	}
 
 	return fmt.Sprintf("count of 0's: %d", len(positions[0]))
+}
+
+func clearConsole() {
+	fmt.Println("\033[2J")
+}
+
+func clearSelected() {
+	for i := 0; i < 9; i++ {
+		for j := 0; j < 9; j++ {
+			cells[i][j].selected = false
+		}
+	}
+}
+
+func clearActive() {
+	for i := 0; i < 9; i++ {
+		for j := 0; j < 9; j++ {
+			cells[i][j].active = false
+			cells[i][j].candid = false
+		}
+	}
 }
