@@ -209,8 +209,6 @@ func candidPos(num int) error {
 	for i := 0; i < 9; i++ {
 		for j := 0; j < 9; j++ {
 
-			cells[i][j].marks = make([]int, 9)
-
 			// every non-selected AND empty cell can accept a mark of this number
 			if cells[i][j].selected == false {
 
@@ -247,12 +245,12 @@ func (c Cell) Content() string {
 		color = "31"
 	}
 
-	if c.active {
-		color = "35"
-	}
-
 	if c.solved {
 		color = "1"
+	}
+
+	if c.active {
+		color = "35"
 	}
 
 	// zero-numbered cells shown as empty
@@ -276,8 +274,10 @@ func main() {
 		panic(err)
 	}
 
+	clearConsole()
+
 	// show initial puzzle state
-	fmt.Printf("new puzzle, difficulty: %s\n", difficulty())
+	fmt.Printf("   New puzzle, difficulty: %s\n", difficulty())
 	printBoard()
 
 	var num int // search using crosshatch method
@@ -302,9 +302,6 @@ func main() {
 
 		clearConsole()
 
-		fmt.Printf("Number %d found in %d cells\n", num, len(positions[num]))
-		fmt.Printf("%d candidate cells for number %d:\n", len(candidates[num]), num)
-
 		if pos, err := crosshatch(num); err != nil {
 			fmt.Println(err)
 		} else {
@@ -314,6 +311,11 @@ func main() {
 			// reload mappings after a new solution
 			mapNumberPositions()
 		}
+
+		clearConsole()
+
+		fmt.Printf("   Number %d found in %d cells\n", num, len(positions[num]))
+		fmt.Printf("   %d candidate cells for number %d:\n", len(candidates[num]), num)
 
 		printBoard()
 
@@ -396,7 +398,7 @@ candid:
 		return pos, nil
 	}
 
-	return pos, fmt.Errorf("no solutions for number %d", num)
+	return pos, fmt.Errorf("   no solutions for number %d", num)
 }
 
 // second level crosshatch:
@@ -404,8 +406,9 @@ candid:
 // adjacent cell candidates eliminate neiboring box's row/cell
 // e.g: in row1 and third box, cells 1,7 and 1,8 eliminate second's box
 // candidates for row 1
-func crosshatch2nd(num) error {
+func crosshatch2nd(num int) error {
 
+	return nil
 }
 
 // puts a number to an empty cell and sets 'solved' to true
@@ -413,7 +416,7 @@ func crosshatch2nd(num) error {
 func putSolution(num int, pos Position) {
 
 	scanner := bufio.NewScanner(os.Stdin)
-	fmt.Printf("cell in row %d and col %d accepts the number %d, hit enter to complete\n", pos.row, pos.col, num)
+	fmt.Printf("   Cell in row %d and col %d accepts the number %d, hit enter to complete", pos.row, pos.col, num)
 	scanner.Scan()
 
 	// the cell
@@ -421,7 +424,7 @@ func putSolution(num int, pos Position) {
 
 	// put solution and validate it
 	if err := c.setNumber(num); err != nil {
-		fmt.Println("error putting solution: ", err)
+		fmt.Println("   error putting solution: ", err)
 		return
 	}
 
@@ -435,18 +438,18 @@ func getNumber() int {
 	scanner := bufio.NewScanner(os.Stdin)
 
 	for {
-		fmt.Print("Enter a number:")
+		fmt.Print("   Enter a number:")
 		scanner.Scan()
 		i, err := strconv.Atoi(scanner.Text())
 		if err != nil {
 			fmt.Printf("\n")
-			fmt.Printf("Must enter a number from 1 to 9\n")
+			fmt.Printf("   Must enter a number from 1 to 9\n")
 			continue
 		}
 
 		if i > 9 || i < 1 {
 			fmt.Printf("\n")
-			fmt.Print("Must enter a number from 1 to 9\n")
+			fmt.Print("   Must enter a number from 1 to 9\n")
 			continue
 		}
 
@@ -462,28 +465,32 @@ func getNumber() int {
 // prints the board with the cells contents if num not zero
 func printBoard() {
 
+	fmt.Printf("\n\n")
+
 	// START first row of boxes
 
+	fmt.Printf("   \033[0;2m" + "  0   1   2   3   4   5   6   7   8\n" + "\033[0m")
+
 	// upper border
-	fmt.Printf("\u250F\u2501\u2501\u2501\u252F\u2501\u2501\u2501\u252F\u2501\u2501\u2501\u2533\u2501\u2501\u2501\u252F\u2501\u2501\u2501\u252F\u2501\u2501\u2501\u2533\u2501\u2501\u2501\u252F\u2501\u2501\u2501\u252F\u2501\u2501\u2501\u2513\n")
+	fmt.Printf("   \u250F\u2501\u2501\u2501\u252F\u2501\u2501\u2501\u252F\u2501\u2501\u2501\u2533\u2501\u2501\u2501\u252F\u2501\u2501\u2501\u252F\u2501\u2501\u2501\u2533\u2501\u2501\u2501\u252F\u2501\u2501\u2501\u252F\u2501\u2501\u2501\u2513\n")
 
 	// first row of numbers
 	printNumberRow(0)
 
 	// first middle row
-	fmt.Printf("\u2520\u2500\u2500\u2500\u253C\u2500\u2500\u2500\u253C\u2500\u2500\u2500\u2542\u2500\u2500\u2500\u253C\u2500\u2500\u2500\u253C\u2500\u2500\u2500\u2542\u2500\u2500\u2500\u253C\u2500\u2500\u2500\u253C\u2500\u2500\u2500\u2528\n")
+	fmt.Printf("   \u2520\u2500\u2500\u2500\u253C\u2500\u2500\u2500\u253C\u2500\u2500\u2500\u2542\u2500\u2500\u2500\u253C\u2500\u2500\u2500\u253C\u2500\u2500\u2500\u2542\u2500\u2500\u2500\u253C\u2500\u2500\u2500\u253C\u2500\u2500\u2500\u2528\n")
 
 	// second row of numbers
 	printNumberRow(1)
 
 	// second middle row
-	fmt.Printf("\u2520\u2500\u2500\u2500\u253C\u2500\u2500\u2500\u253C\u2500\u2500\u2500\u2542\u2500\u2500\u2500\u253C\u2500\u2500\u2500\u253C\u2500\u2500\u2500\u2542\u2500\u2500\u2500\u253C\u2500\u2500\u2500\u253C\u2500\u2500\u2500\u2528\n")
+	fmt.Printf("   \u2520\u2500\u2500\u2500\u253C\u2500\u2500\u2500\u253C\u2500\u2500\u2500\u2542\u2500\u2500\u2500\u253C\u2500\u2500\u2500\u253C\u2500\u2500\u2500\u2542\u2500\u2500\u2500\u253C\u2500\u2500\u2500\u253C\u2500\u2500\u2500\u2528\n")
 
 	// third row of numbers
 	printNumberRow(2)
 
 	// lower border
-	fmt.Printf("\u2523\u2501\u2501\u2501\u253F\u2501\u2501\u2501\u253F\u2501\u2501\u2501\u254B\u2501\u2501\u2501\u253F\u2501\u2501\u2501\u253F\u2501\u2501\u2501\u254B\u2501\u2501\u2501\u253F\u2501\u2501\u2501\u253F\u2501\u2501\u2501\u252B\n")
+	fmt.Printf("   \u2523\u2501\u2501\u2501\u253F\u2501\u2501\u2501\u253F\u2501\u2501\u2501\u254B\u2501\u2501\u2501\u253F\u2501\u2501\u2501\u253F\u2501\u2501\u2501\u254B\u2501\u2501\u2501\u253F\u2501\u2501\u2501\u253F\u2501\u2501\u2501\u252B\n")
 
 	// END first row of boxes
 
@@ -494,19 +501,19 @@ func printBoard() {
 	printNumberRow(3)
 
 	// first middle row
-	fmt.Printf("\u2520\u2500\u2500\u2500\u253C\u2500\u2500\u2500\u253C\u2500\u2500\u2500\u2542\u2500\u2500\u2500\u253C\u2500\u2500\u2500\u253C\u2500\u2500\u2500\u2542\u2500\u2500\u2500\u253C\u2500\u2500\u2500\u253C\u2500\u2500\u2500\u2528\n")
+	fmt.Printf("   \u2520\u2500\u2500\u2500\u253C\u2500\u2500\u2500\u253C\u2500\u2500\u2500\u2542\u2500\u2500\u2500\u253C\u2500\u2500\u2500\u253C\u2500\u2500\u2500\u2542\u2500\u2500\u2500\u253C\u2500\u2500\u2500\u253C\u2500\u2500\u2500\u2528\n")
 
 	// second row of numbers
 	printNumberRow(4)
 
 	// second middle row
-	fmt.Printf("\u2520\u2500\u2500\u2500\u253C\u2500\u2500\u2500\u253C\u2500\u2500\u2500\u2542\u2500\u2500\u2500\u253C\u2500\u2500\u2500\u253C\u2500\u2500\u2500\u2542\u2500\u2500\u2500\u253C\u2500\u2500\u2500\u253C\u2500\u2500\u2500\u2528\n")
+	fmt.Printf("   \u2520\u2500\u2500\u2500\u253C\u2500\u2500\u2500\u253C\u2500\u2500\u2500\u2542\u2500\u2500\u2500\u253C\u2500\u2500\u2500\u253C\u2500\u2500\u2500\u2542\u2500\u2500\u2500\u253C\u2500\u2500\u2500\u253C\u2500\u2500\u2500\u2528\n")
 
 	// third row of numbers
 	printNumberRow(5)
 
 	// lower border
-	fmt.Printf("\u2523\u2501\u2501\u2501\u253F\u2501\u2501\u2501\u253F\u2501\u2501\u2501\u254B\u2501\u2501\u2501\u253F\u2501\u2501\u2501\u253F\u2501\u2501\u2501\u254B\u2501\u2501\u2501\u253F\u2501\u2501\u2501\u253F\u2501\u2501\u2501\u252B\n")
+	fmt.Printf("   \u2523\u2501\u2501\u2501\u253F\u2501\u2501\u2501\u253F\u2501\u2501\u2501\u254B\u2501\u2501\u2501\u253F\u2501\u2501\u2501\u253F\u2501\u2501\u2501\u254B\u2501\u2501\u2501\u253F\u2501\u2501\u2501\u253F\u2501\u2501\u2501\u252B\n")
 
 	// END second row of boxes
 
@@ -517,19 +524,19 @@ func printBoard() {
 	printNumberRow(6)
 
 	// first middle row
-	fmt.Printf("\u2520\u2500\u2500\u2500\u253C\u2500\u2500\u2500\u253C\u2500\u2500\u2500\u2542\u2500\u2500\u2500\u253C\u2500\u2500\u2500\u253C\u2500\u2500\u2500\u2542\u2500\u2500\u2500\u253C\u2500\u2500\u2500\u253C\u2500\u2500\u2500\u2528\n")
+	fmt.Printf("   \u2520\u2500\u2500\u2500\u253C\u2500\u2500\u2500\u253C\u2500\u2500\u2500\u2542\u2500\u2500\u2500\u253C\u2500\u2500\u2500\u253C\u2500\u2500\u2500\u2542\u2500\u2500\u2500\u253C\u2500\u2500\u2500\u253C\u2500\u2500\u2500\u2528\n")
 
 	// second row of numbers
 	printNumberRow(7)
 
 	// second middle row
-	fmt.Printf("\u2520\u2500\u2500\u2500\u253C\u2500\u2500\u2500\u253C\u2500\u2500\u2500\u2542\u2500\u2500\u2500\u253C\u2500\u2500\u2500\u253C\u2500\u2500\u2500\u2542\u2500\u2500\u2500\u253C\u2500\u2500\u2500\u253C\u2500\u2500\u2500\u2528\n")
+	fmt.Printf("   \u2520\u2500\u2500\u2500\u253C\u2500\u2500\u2500\u253C\u2500\u2500\u2500\u2542\u2500\u2500\u2500\u253C\u2500\u2500\u2500\u253C\u2500\u2500\u2500\u2542\u2500\u2500\u2500\u253C\u2500\u2500\u2500\u253C\u2500\u2500\u2500\u2528\n")
 
 	// third row of numbers
 	printNumberRow(8)
 
 	// lower border
-	fmt.Printf("\u2517\u2501\u2501\u2501\u2537\u2501\u2501\u2501\u2537\u2501\u2501\u2501\u253B\u2501\u2501\u2501\u2537\u2501\u2501\u2501\u2537\u2501\u2501\u2501\u253B\u2501\u2501\u2501\u2537\u2501\u2501\u2501\u2537\u2501\u2501\u2501\u251B\n")
+	fmt.Printf("   \u2517\u2501\u2501\u2501\u2537\u2501\u2501\u2501\u2537\u2501\u2501\u2501\u253B\u2501\u2501\u2501\u2537\u2501\u2501\u2501\u2537\u2501\u2501\u2501\u253B\u2501\u2501\u2501\u2537\u2501\u2501\u2501\u2537\u2501\u2501\u2501\u251B\n")
 
 	// END third row of boxes
 
@@ -540,7 +547,9 @@ func printNumberRow(n int) {
 
 	// replace 2502 with 250A or 2506 for vertical lines as cells separators
 
-	fmt.Printf("\u2503 %s \u2502 %s \u2502 %s \u2503", cells[n][0].Content(), cells[n][1].Content(), cells[n][2].Content())
+	fmt.Printf(" \033[0;2m%d\033[0m", n)
+
+	fmt.Printf(" \u2503 %s \u2502 %s \u2502 %s \u2503", cells[n][0].Content(), cells[n][1].Content(), cells[n][2].Content())
 	fmt.Printf(" %s \u2502 %s \u2502 %s \u2503", cells[n][3].Content(), cells[n][4].Content(), cells[n][5].Content())
 	fmt.Printf(" %s \u2502 %s \u2502 %s \u2503\n", cells[n][6].Content(), cells[n][7].Content(), cells[n][8].Content())
 }

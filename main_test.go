@@ -1,6 +1,60 @@
 package main
 
-import "testing"
+import (
+	"fmt"
+	"testing"
+)
+
+func TestMarks(t *testing.T) {
+
+	if err := loadPuzzle(); err != nil {
+		panic(err)
+	}
+
+	clearConsole()
+
+	fmt.Printf("new puzzle, difficulty: %s\n", difficulty())
+
+	for i := 1; i < 10; i++ {
+
+		if err := selectNumber(i); err != nil {
+			fmt.Println(err)
+		}
+
+		if err := candidPos(i); err != nil {
+			fmt.Println(err)
+		}
+	}
+
+	// show all marks
+	// for i := 0; i < 9; i++ {
+	// 	for j := 0; j < 9; j++ {
+
+	// 		fmt.Printf("marks for cell: [%d][%d]: ", i, j)
+
+	// 		for _, v := range cells[i][j].marks {
+	// 			fmt.Printf("%d, ", v)
+	// 		}
+
+	// 		fmt.Printf("\n")
+
+	// 	}
+	// }
+
+	// show all candidates
+	// for i := 1; i < 10; i++ {
+
+	// 	fmt.Printf("%d candidates for number %d: ", len(candidates[i]), i)
+
+	// 	for _, v := range candidates[i] {
+	// 		fmt.Printf("[%d][%d], ", v.row, v.col)
+	// 	}
+
+	// 	fmt.Printf("\n")
+
+	// }
+
+}
 
 func TestPrintBoard(t *testing.T) {
 
