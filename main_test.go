@@ -1,30 +1,29 @@
 package main
 
 import (
-	"fmt"
 	"testing"
 )
 
 func TestMarks(t *testing.T) {
 
-	if err := loadPuzzle(); err != nil {
-		panic(err)
-	}
+	// if err := loadPuzzle(); err != nil {
+	// 	panic(err)
+	// }
 
-	clearConsole()
+	// clearConsole()
 
-	fmt.Printf("new puzzle, difficulty: %s\n", difficulty())
+	// fmt.Printf("new puzzle, difficulty: %s\n", difficulty())
 
-	for i := 1; i < 10; i++ {
+	// for i := 1; i < 10; i++ {
 
-		if err := selectNumber(i); err != nil {
-			fmt.Println(err)
-		}
+	// 	if err := selectNumber(i); err != nil {
+	// 		fmt.Println(err)
+	// 	}
 
-		if err := candidPos(i); err != nil {
-			fmt.Println(err)
-		}
-	}
+	// 	if err := candidPos(i); err != nil {
+	// 		fmt.Println(err)
+	// 	}
+	// }
 
 	// show all marks
 	// for i := 0; i < 9; i++ {

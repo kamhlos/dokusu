@@ -207,6 +207,7 @@ func candidPos(num int) error {
 	candidates = make(map[int][]Position)
 
 	for i := 0; i < 9; i++ {
+	forcell:
 		for j := 0; j < 9; j++ {
 
 			// every non-selected AND empty cell can accept a mark of this number
@@ -214,14 +215,22 @@ func candidPos(num int) error {
 
 				if cells[i][j].Number == 0 {
 
-					// add mark to this cell as a candidate number
-					cells[i][j].marks = append(cells[i][j].marks, num)
-
 					// add this cell as a candidate position for this number
 					var pos Position
 					pos.row = i
 					pos.col = j
 					candidates[num] = append(candidates[num], pos)
+
+					// check all marks for this cell
+					for _, mark := range cells[i][j].marks {
+						if mark == num {
+							continue forcell // continue to next cell if mark already exists
+						}
+					}
+
+					// add mark to this cell as a candidate number
+					cells[i][j].marks = append(cells[i][j].marks, num)
+
 				}
 
 			} else {
@@ -540,7 +549,41 @@ func printBoard() {
 
 	// END third row of boxes
 
-	fmt.Printf("\n\n")
+	// show all marks
+	for i := 0; i < 9; i++ {
+	cont:
+		for j := 0; j < 9; j++ {
+
+			// don't print if cell has a number
+			if cells[i][j].Number != 0 {
+				continue cont
+			}
+
+			fmt.Printf("marks for cell: [%d][%d]: ", i, j)
+
+			for _, v := range cells[i][j].marks {
+				fmt.Printf("%d, ", v)
+			}
+
+			fmt.Printf("\n")
+
+		}
+	}
+
+	// // show all candidates
+	// for i := 1; i < 10; i++ {
+
+	// 	fmt.Printf("%d candidates for number %d: ", len(candidates[i]), i)
+
+	// 	for _, v := range candidates[i] {
+	// 		fmt.Printf("[%d][%d], ", v.row, v.col)
+	// 	}
+
+	// 	fmt.Printf("\n")
+
+	// }
+
+	//fmt.Printf("\n\n")
 }
 
 func printNumberRow(n int) {
