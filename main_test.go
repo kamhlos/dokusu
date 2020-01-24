@@ -1,8 +1,20 @@
 package main
 
-import (
-	"testing"
-)
+import "testing"
+
+func TestMapBoxes(t *testing.T) {
+
+	// if err := loadPuzzle(); err != nil {
+	// 	panic(err)
+	// }
+
+	// mapBoxes()
+
+	// for k, v := range boxes {
+	// 	fmt.Printf("cells in box %d%d :", k.row, k.col)
+	// 	fmt.Printf("%d, \n", v)
+	// }
+}
 
 func TestMarks(t *testing.T) {
 

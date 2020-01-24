@@ -18,6 +18,27 @@ var candidates map[int][]Position
 // the puzzle
 var cells [9][9]*Cell
 
+// the 9cell boxes
+var boxes map[Position][]Position
+
+// map all cells into 9cell boxes
+func mapBoxes() {
+
+	boxes = make(map[Position][]Position)
+
+	for row := 0; row < 9; row++ {
+		for col := 0; col < 9; col++ {
+
+			pos := Position{row, col}
+
+			boxStart := cells[row][col].box()
+
+			boxes[boxStart] = append(boxes[boxStart], pos)
+
+		}
+	}
+}
+
 func loadPuzzle() error {
 
 	j, err := ioutil.ReadFile("puzzle.json")
@@ -283,6 +304,9 @@ func main() {
 		panic(err)
 	}
 
+	// map all cells to 9cell boxes
+	mapBoxes()
+
 	clearConsole()
 
 	// show initial puzzle state
@@ -329,6 +353,16 @@ func main() {
 		printBoard()
 
 		clearActive()
+
+		// print marks for candidate cells
+		for _, v := range candidates[num] {
+			fmt.Printf("marks for [%d][%d]: ", v.row, v.col)
+			for _, m := range cells[v.row][v.col].marks {
+				fmt.Printf("%d, ", m)
+			}
+			fmt.Printf("\n")
+		}
+
 		// get a new number to crosshatch
 		num = getNumber()
 	}
@@ -416,6 +450,38 @@ candid:
 // e.g: in row1 and third box, cells 1,7 and 1,8 eliminate second's box
 // candidates for row 1
 func crosshatch2nd(num int) error {
+
+	boxCandids := make(map[Position][]Position)
+
+	// map each candidate position to a box
+	for _, pos := range candidates[num] {
+
+		// this cell's box (identified by it's starting position)
+		box := cells[pos.row][pos.col].box()
+
+		// put this candidate position in the map
+		boxCandids[box] = append(boxCandids[box], pos)
+	}
+
+	// for each map of box with candidates
+boxc:
+	for _, posList := range boxCandids {
+		if len(posList) > 0 && len(posList) < 4 {
+
+			// TODO: check if all candidates within this box
+			// are in the same row or column
+			for _, pos := range posList {
+				if posList[0].row != pos.row || posList[0].col != pos.col {
+					break boxc
+				}
+			}
+
+			// this box has a row or column of candidates
+			// TODO:
+			// find candidates within this row or column outside this box
+			// and set candid to false
+		}
+	}
 
 	return nil
 }
@@ -549,41 +615,7 @@ func printBoard() {
 
 	// END third row of boxes
 
-	// show all marks
-	for i := 0; i < 9; i++ {
-	cont:
-		for j := 0; j < 9; j++ {
-
-			// don't print if cell has a number
-			if cells[i][j].Number != 0 {
-				continue cont
-			}
-
-			fmt.Printf("marks for cell: [%d][%d]: ", i, j)
-
-			for _, v := range cells[i][j].marks {
-				fmt.Printf("%d, ", v)
-			}
-
-			fmt.Printf("\n")
-
-		}
-	}
-
-	// // show all candidates
-	// for i := 1; i < 10; i++ {
-
-	// 	fmt.Printf("%d candidates for number %d: ", len(candidates[i]), i)
-
-	// 	for _, v := range candidates[i] {
-	// 		fmt.Printf("[%d][%d], ", v.row, v.col)
-	// 	}
-
-	// 	fmt.Printf("\n")
-
-	// }
-
-	//fmt.Printf("\n\n")
+	fmt.Printf("\n\n")
 }
 
 func printNumberRow(n int) {
