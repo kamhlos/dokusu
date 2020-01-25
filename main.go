@@ -245,7 +245,7 @@ func candidPos(num int) error {
 					// check all marks for this cell
 					for _, mark := range cells[i][j].marks {
 						if mark == num {
-							continue forcell // continue to next cell if mark already exists
+							continue forcell // continue to next cell if mark exists
 						}
 					}
 
@@ -307,7 +307,7 @@ func main() {
 	// map all cells to 9cell boxes
 	mapBoxes()
 
-	clearConsole()
+	// clearConsole()
 
 	// show initial puzzle state
 	fmt.Printf("   New puzzle, difficulty: %s\n", difficulty())
@@ -333,7 +333,7 @@ func main() {
 			cells[v.row][v.col].candid = true
 		}
 
-		clearConsole()
+		// clearConsole()
 
 		if pos, err := crosshatch(num); err != nil {
 			fmt.Println(err)
@@ -345,7 +345,7 @@ func main() {
 			mapNumberPositions()
 		}
 
-		clearConsole()
+		// clearConsole()
 
 		fmt.Printf("   Number %d found in %d cells\n", num, len(positions[num]))
 		fmt.Printf("   %d candidate cells for number %d:\n", len(candidates[num]), num)
@@ -354,19 +354,18 @@ func main() {
 
 		clearActive()
 
-		// print marks for candidate cells
-		for _, v := range candidates[num] {
-			fmt.Printf("marks for [%d][%d]: ", v.row, v.col)
-			for _, m := range cells[v.row][v.col].marks {
-				fmt.Printf("%d, ", m)
-			}
-			fmt.Printf("\n")
-		}
+		// // print marks for candidate cells
+		// for _, v := range candidates[num] {
+		// 	fmt.Printf("marks for [%d][%d]: ", v.row, v.col)
+		// 	for _, m := range cells[v.row][v.col].marks {
+		// 		fmt.Printf("%d, ", m)
+		// 	}
+		// 	fmt.Printf("\n")
+		// }
 
 		// get a new number to crosshatch
 		num = getNumber()
 	}
-
 }
 
 // cross-hatching method:
@@ -441,6 +440,8 @@ candid:
 		return pos, nil
 	}
 
+	crosshatch2nd(num)
+
 	return pos, fmt.Errorf("   no solutions for number %d", num)
 }
 
@@ -449,7 +450,7 @@ candid:
 // adjacent cell candidates eliminate neiboring box's row/cell
 // e.g: in row1 and third box, cells 1,7 and 1,8 eliminate second's box
 // candidates for row 1
-func crosshatch2nd(num int) error {
+func crosshatch2nd(num int) {
 
 	boxCandids := make(map[Position][]Position)
 
@@ -464,26 +465,123 @@ func crosshatch2nd(num int) error {
 	}
 
 	// for each map of box with candidates
-boxc:
-	for _, posList := range boxCandids {
-		if len(posList) > 0 && len(posList) < 4 {
+boxesloop:
+	for k, posList := range boxCandids {
 
-			// TODO: check if all candidates within this box
-			// are in the same row or column
-			for _, pos := range posList {
-				if posList[0].row != pos.row || posList[0].col != pos.col {
-					break boxc
+		// all candids within this box have same starting position
+		box := Position{k.row, k.col}
+
+		if len(posList) == 2 {
+
+			// if candid positions alligned in row
+			if posList[0].row == posList[1].row {
+
+				// iterate over all cells in row
+				for i := 0; i < 9; i++ {
+					row := posList[0].row
+					c := cells[row][i]
+
+					// and remove candid status if in other boxes
+					if c.box() != box {
+						c.candid = false
+					}
 				}
 			}
 
-			// this box has a row or column of candidates
-			// TODO:
-			// find candidates within this row or column outside this box
-			// and set candid to false
-		}
-	}
+			// if candid positions alligned in column
+			if posList[0].col == posList[1].col {
 
-	return nil
+				// iterate over all cells in column
+				for i := 0; i < 9; i++ {
+					col := posList[0].col
+					c := cells[i][col]
+
+					// and remove candid status if in other boxes
+					if c.box() != box {
+						c.candid = false
+					}
+				}
+			}
+		}
+
+		if len(posList) == 3 {
+			for _, v := range posList {
+				if posList[0].row != v.row {
+					break boxesloop
+				}
+
+				if posList[0].col != v.col {
+					break boxesloop
+				}
+			}
+
+			// at this point we know all candidates belong to one row or column
+			// check if same row first
+			if posList[0].row == posList[1].row {
+				// iterate over all cells in row
+				for i := 0; i < 9; i++ {
+					row := posList[0].row
+					c := cells[row][i]
+
+					// and remove candid status if in other boxes
+					if c.box() != box {
+						c.candid = false
+					}
+				}
+			} else {
+				// iterate over all cells in column
+				for i := 0; i < 9; i++ {
+					col := posList[0].col
+					c := cells[i][col]
+
+					// and remove candid status if in other boxes
+					if c.box() != box {
+						c.candid = false
+					}
+				}
+			}
+		}
+
+		// if len(posList) == 3 {
+		// 	for _, v := range posList {
+
+		// 		if posList[0].row != v.row { // not all in same row
+		// 			break boxc
+		// 		}
+
+		// 		if posList[0].col != v.col { // not all in same column
+		// 			break boxc
+		// 		}
+		// 	}
+
+		// 	// at this point we know all in same row or column
+		// 	if posList[0].row == posList[1].row {
+
+		// 		// remove candididates from this row
+		// 		for i := 0; i < 9; i++ {
+		// 			// that do not belong in this box
+		// 			if cells[i][posList[0].col].box() != box {
+		// 				fmt.Printf("remove row candidate %d%d\n", i, posList[0].col)
+		// 				cells[i][posList[0].col].candid = false
+		// 				// TODO: remove marks?
+		// 			}
+		// 		}
+		// 	}
+
+		// 	if posList[0].col == posList[1].col {
+
+		// 		// remove candididates from this column
+		// 		for i := 0; i < 9; i++ {
+		// 			// that do not belong in this box
+		// 			if cells[posList[0].row][i].box() != box {
+		// 				fmt.Printf("remove col candidate %d%d\n", posList[0].row, i)
+		// 				cells[posList[0].row][i].candid = false
+		// 				// TODO: remove marks
+		// 			}
+		// 		}
+		// 	}
+		// }
+	}
 }
 
 // puts a number to an empty cell and sets 'solved' to true
