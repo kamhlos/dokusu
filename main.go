@@ -76,7 +76,7 @@ func mapNumberPositions() error {
 
 			cells[i][j].row = i
 			cells[i][j].col = j
-			if err := cells[i][j].setNumber(number); err != nil {
+			if err := cells[i][j].checkCell(number); err != nil {
 				return err
 			}
 
@@ -93,7 +93,7 @@ func mapNumberPositions() error {
 }
 
 // SetNum for a cell
-func (c Cell) setNumber(num int) error {
+func (c Cell) checkCell(num int) error {
 
 	// check before setting this cell's number
 
@@ -166,64 +166,42 @@ func (c Cell) box() Position {
 }
 
 // selects rows and columns containing a given number
-func selectNumber(num int) error {
+func selectNumber(num int) {
 
 	// first find the cells (positions) containing this number
 	numpos := positions[num]
 
 	// select(highlight) rows and columns of those cells
 	for _, v := range numpos {
-		if err := selectCells(v.row, v.col); err != nil {
-			fmt.Printf("error selecting row/column: %s\n", err)
-		}
+		selectCells(v.row, v.col)
 	}
-
-	return nil
 }
 
 // selects a box, row and a column of a given cell position
-func selectCells(row int, col int) error {
+func selectCells(row int, col int) {
 
-	// cannot select out of range
-	if row < 0 || row > 8 {
-		return fmt.Errorf("row out of range: %d", row)
-	}
-
-	if col < 0 || col > 8 {
-		return fmt.Errorf("column out of range: %d", col)
-	}
+	// this cell
+	c := cells[row][col]
 
 	// activate this cell to show number's position
-	cells[row][col].active = true
+	c.active = true
 
-	// there is no point in selecting an empty cell
-	if cells[row][col].Number == 0 {
-		return fmt.Errorf("%s", "cannot select an empty cell")
+	for i := 0; i < 9; i++ {
+		cells[row][i].selected = true // select the cells within that row
+		cells[i][col].selected = true // select the cells within that column
 	}
 
-	// first select the cells within that row
-	for k := range cells[row] {
-		cells[row][k].selected = true
-	}
-
-	// then select those within that column
-	for k := range cells {
-		cells[k][col].selected = true
-	}
-
-	// finally select those within that box
-	box := cells[row][col].box()
+	// select all neiboring cells within that box
+	box := c.box()
 	for k := box.row; k < box.row+3; k++ {
 		for l := box.col; l < box.col+3; l++ {
 			cells[k][l].selected = true
 		}
 	}
-
-	return nil
 }
 
 // find/mark candidate cell positions for a number
-func candidPos(num int) error {
+func candidPos(num int) {
 
 	candidates = make(map[int][]Position)
 
@@ -231,37 +209,31 @@ func candidPos(num int) error {
 	forcell:
 		for j := 0; j < 9; j++ {
 
+			// this cell
+			c := cells[i][j]
+
 			// every non-selected AND empty cell can accept a mark of this number
-			if cells[i][j].selected == false {
+			if c.selected == false && c.Number == 0 {
 
-				if cells[i][j].Number == 0 {
+				// add this cell as a candidate position for this number
+				candidates[num] = append(candidates[num], Position{i, j})
 
-					// add this cell as a candidate position for this number
-					var pos Position
-					pos.row = i
-					pos.col = j
-					candidates[num] = append(candidates[num], pos)
+				// candid cells show a green background
+				c.candid = true
 
-					// check all marks for this cell
-					for _, mark := range cells[i][j].marks {
-						if mark == num {
-							continue forcell // continue to next cell if mark exists
-						}
+				// check all marks for this cell
+				for _, mark := range c.marks {
+					if mark == num {
+						continue forcell // continue to next cell if mark exists
 					}
-
-					// add mark to this cell as a candidate number
-					cells[i][j].marks = append(cells[i][j].marks, num)
-
 				}
 
-			} else {
-				// remove from selected
-				cells[i][j].selected = false
+				// add mark to this cell as a candidate number
+				c.marks = append(c.marks, num)
+
 			}
 		}
 	}
-
-	return nil
 }
 
 // Content prints a cell's number as a string
@@ -320,30 +292,24 @@ func main() {
 
 		// select cells associated with this number;
 		// rows, columns and 9cell boxes
-		if err := selectNumber(num); err != nil {
-			fmt.Println(err)
-		}
+		selectNumber(num)
 
 		// from selections above, find candidate cells for this number
-		if err := candidPos(num); err != nil {
-			fmt.Println(err)
-		}
+		candidPos(num)
 
-		for _, v := range candidates[num] {
-			cells[v.row][v.col].candid = true
-		}
+		crosshatch2nd(num)
 
 		// clearConsole()
 
-		if pos, err := crosshatch(num); err != nil {
-			fmt.Println(err)
-		} else {
-			printBoard()
-			putSolution(num, pos)
+		// if pos, err := crosshatch(num); err != nil {
+		// 	fmt.Println(err)
+		// } else {
+		// 	printBoard()
+		// 	putSolution(num, pos)
 
-			// reload mappings after a new solution
-			mapNumberPositions()
-		}
+		// 	// reload mappings after a new solution
+		// 	mapNumberPositions()
+		// }
 
 		// clearConsole()
 
@@ -351,7 +317,6 @@ func main() {
 		fmt.Printf("   %d candidate cells for number %d:\n", len(candidates[num]), num)
 
 		printBoard()
-
 		clearActive()
 
 		// // print marks for candidate cells
@@ -471,116 +436,112 @@ boxesloop:
 		// all candids within this box have same starting position
 		box := Position{k.row, k.col}
 
+		// first case: only one candidate in this box
+		if len(posList) == 1 {
+			putSolution(num, posList[0])
+			continue boxesloop // continue to the next box
+		}
+
+		// second case: two candids within this box;
+		// check if alligned in row or column, if true
+		// then check rest of the row or column and remove others
 		if len(posList) == 2 {
 
 			// if candid positions alligned in row
 			if posList[0].row == posList[1].row {
 
+				fmt.Printf("candidates %v and %v in same row: ", posList[0], posList[1])
+
 				// iterate over all cells in row
 				for i := 0; i < 9; i++ {
 					row := posList[0].row
 					c := cells[row][i]
 
 					// and remove candid status if in other boxes
-					if c.box() != box {
+					if c.box() != box && c.candid == true {
+						fmt.Printf("remove %d%d from candidates\n", c.row, c.col)
 						c.candid = false
 					}
 				}
+
+				continue boxesloop // continue to the next box
+
 			}
 
 			// if candid positions alligned in column
 			if posList[0].col == posList[1].col {
 
+				fmt.Printf("candidates %v and %v in same column: ", posList[0], posList[1])
+
 				// iterate over all cells in column
 				for i := 0; i < 9; i++ {
 					col := posList[0].col
 					c := cells[i][col]
 
 					// and remove candid status if in other boxes
-					if c.box() != box {
+					if c.box() != box && c.candid == true {
+						fmt.Printf("remove %d%d from candidates\n", c.row, c.col)
 						c.candid = false
 					}
 				}
+
+				continue boxesloop // continue to the next box
+
 			}
 		}
 
+		// third case: three candids within this box
 		if len(posList) == 3 {
 			for _, v := range posList {
+
+				// at least one pair if found in different row
 				if posList[0].row != v.row {
-					break boxesloop
+					continue boxesloop // continue to the next box
 				}
 
+				// at least one pair if found in different column
 				if posList[0].col != v.col {
-					break boxesloop
+					continue boxesloop // continue to the next box
 				}
 			}
 
-			// at this point we know all candidates belong to one row or column
-			// check if same row first
+			// at this point we know all candidates in same row or column
+			// first check if same row
 			if posList[0].row == posList[1].row {
+
+				fmt.Printf("candidates %v, %v and %v in same row: ", posList[0], posList[1], posList[2])
 				// iterate over all cells in row
 				for i := 0; i < 9; i++ {
 					row := posList[0].row
 					c := cells[row][i]
 
 					// and remove candid status if in other boxes
-					if c.box() != box {
+					if c.box() != box && c.candid == true {
+						fmt.Printf("remove %d%d from candidates\n", c.row, c.col)
 						c.candid = false
 					}
 				}
+
+				continue boxesloop // continue to the next box
+
 			} else {
+				fmt.Printf("candidates %v, %v and %v in same column: ", posList[0], posList[1], posList[2])
 				// iterate over all cells in column
 				for i := 0; i < 9; i++ {
 					col := posList[0].col
 					c := cells[i][col]
 
 					// and remove candid status if in other boxes
-					if c.box() != box {
+					if c.box() != box && c.candid == true {
+						fmt.Printf("remove %d%d from candidates\n", c.row, c.col)
 						c.candid = false
 					}
 				}
+
+				continue boxesloop // continue to the next box
+
 			}
 		}
-
-		// if len(posList) == 3 {
-		// 	for _, v := range posList {
-
-		// 		if posList[0].row != v.row { // not all in same row
-		// 			break boxc
-		// 		}
-
-		// 		if posList[0].col != v.col { // not all in same column
-		// 			break boxc
-		// 		}
-		// 	}
-
-		// 	// at this point we know all in same row or column
-		// 	if posList[0].row == posList[1].row {
-
-		// 		// remove candididates from this row
-		// 		for i := 0; i < 9; i++ {
-		// 			// that do not belong in this box
-		// 			if cells[i][posList[0].col].box() != box {
-		// 				fmt.Printf("remove row candidate %d%d\n", i, posList[0].col)
-		// 				cells[i][posList[0].col].candid = false
-		// 				// TODO: remove marks?
-		// 			}
-		// 		}
-		// 	}
-
-		// 	if posList[0].col == posList[1].col {
-
-		// 		// remove candididates from this column
-		// 		for i := 0; i < 9; i++ {
-		// 			// that do not belong in this box
-		// 			if cells[posList[0].row][i].box() != box {
-		// 				fmt.Printf("remove col candidate %d%d\n", posList[0].row, i)
-		// 				cells[posList[0].row][i].candid = false
-		// 				// TODO: remove marks
-		// 			}
-		// 		}
-		// 	}
-		// }
 	}
 }
 
@@ -596,13 +557,13 @@ func putSolution(num int, pos Position) {
 	c := cells[pos.row][pos.col]
 
 	// put solution and validate it
-	if err := c.setNumber(num); err != nil {
+	if err := c.checkCell(num); err != nil {
 		fmt.Println("   error putting solution: ", err)
 		return
 	}
 
-	cells[pos.row][pos.col].Number = num
-	cells[pos.row][pos.col].solved = true
+	c.Number = num
+	c.solved = true
 }
 
 func getNumber() int {
